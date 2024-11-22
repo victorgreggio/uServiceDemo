@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="AGTec.Common.Repository" Version="1.0.0" />
+        <PackageReference Include="Microsoft.CodeAnalysis.Compilers" Version="4.5.0" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.11" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Domain\uServiceDemo.Domain.csproj" />
+    </ItemGroup>
+</Project>

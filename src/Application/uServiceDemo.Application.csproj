@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+    </PropertyGroup>
+    <ItemGroup>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+            <_Parameter1>$(AssemblyName).Test</_Parameter1>
+        </AssemblyAttribute>
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="AGTec.Common.BackgroundTaskQueue" Version="1.0.0" />
+        <PackageReference Include="AGTec.Common.CQRS.Messaging.ActiveMQ" Version="1.0.0" />
+        <PackageReference Include="AGTec.Common.CQRS.Messaging.ProtoBufSerializer" Version="1.0.0" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />
+        <PackageReference Include="AutoMapper" Version="13.0.1" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Contracts\uServiceDemo.Contracts.csproj" />
+        <ProjectReference Include="..\Events\uServiceDemo.Events.csproj" />
+        <ProjectReference Include="..\Infrastructure\uServiceDemo.Infrastructure.csproj" />
+        <ProjectReference Include="..\Document\uServiceDemo.Document.csproj" />
+    </ItemGroup>
+</Project>
