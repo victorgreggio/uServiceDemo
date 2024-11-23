@@ -1,0 +1,81 @@
+services:
+    mongo:
+        image: mongo
+        hostname: mongo
+        restart: always
+        ports:
+            - 27017:27017
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: ${MONGO_ADMIN_USERNAME}
+            MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ADMIN_PASSWORD}
+        networks:
+            - uservicedemo-network
+
+    postgres:
+        image: postgres
+        hostname: postgres
+        restart: always
+        shm_size: 128mb
+        environment:
+            POSTGRES_USER: ${POSTGRES_USER}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+        ports:
+            - 5432:5432
+        networks:
+            - uservicedemo-network
+
+    activemq:
+        image: apache/activemq-classic
+        hostname: activemq
+        restart: always
+        container_name: activemq
+        ports:
+            - '8161:8161'
+            - '61616:61616'
+            - '5672:5672'
+        networks:
+            - uservicedemo-network
+
+    uservicedemo-api:
+        restart: always
+        depends_on:
+            - activemq
+            - mongo
+            - postgres
+        build:
+            context: .
+            dockerfile: Dockerfile
+            target: api
+        ports:
+            - 8080:8080
+        environment:
+            ASPNETCORE_ENVIRONMENT: ${ENV_NAME}
+            AGTEC_ConnectionStrings__uServiceDemoDB: ${POSTGRESS_CONN_STR}
+            AGTEC_ActiveMQ__ConnectionString: ${AMQ_CONN_STR}
+            AGTEC_DocumentDBConfiguration__ConnectionString: ${MONGO_CONN_STR}
+            AGTEC_DocumentDBConfiguration__Database: ${MONGO_DB_NAME}
+        networks:
+            - uservicedemo-network
+
+    uservicedemo-worker:
+        restart: always
+        depends_on:
+            - activemq
+            - mongo
+            - postgres
+        build:
+            context: .
+            dockerfile: Dockerfile
+            target: worker
+        environment:
+            ASPNETCORE_ENVIRONMENT: ${ENV_NAME}
+            AGTEC_ConnectionStrings__uServiceDemoDB: ${POSTGRESS_CONN_STR}
+            AGTEC_ActiveMQ__ConnectionString: ${AMQ_CONN_STR}
+            AGTEC_DocumentDBConfiguration__ConnectionString: ${MONGO_CONN_STR}
+            AGTEC_DocumentDBConfiguration__Database: ${MONGO_DB_NAME}
+        networks:
+            - uservicedemo-network
+
+networks:
+    uservicedemo-network:
+        driver: bridge
