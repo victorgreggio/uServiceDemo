@@ -96,7 +96,7 @@ services:
             AGTEC_DocumentDBConfiguration__Database: ${MONGO_DB_NAME}
             AGTEC_SearchDBConfiguration__Username: ${ELASTIC_USERNAME}
             AGTEC_SearchDBConfiguration__Password: ${ELASTIC_PASSWORD}
-            AGTEC_SearchDBConfiguration__Host: ${ELASTIC_HOSTS}
+            AGTEC_SearchDBConfiguration__Host: ${ELASTIC_HOST}
         networks:
             - uservicedemo-network
 
@@ -120,7 +120,7 @@ services:
             AGTEC_DocumentDBConfiguration__Database: ${MONGO_DB_NAME}
             AGTEC_SearchDBConfiguration__Username: ${ELASTIC_USERNAME}
             AGTEC_SearchDBConfiguration__Password: ${ELASTIC_PASSWORD}
-            AGTEC_SearchDBConfiguration__Host: ${ELASTIC_HOSTS}
+            AGTEC_SearchDBConfiguration__Host: ${ELASTIC_HOST}
         networks:
             - uservicedemo-network
 
