@@ -1,5 +1,10 @@
 services:
     mongo:
+        profiles:
+            - infra
+            - api
+            - worker
+            - all
         image: mongo
         hostname: mongo
         restart: always
@@ -12,6 +17,11 @@ services:
             - uservicedemo-network
 
     postgres:
+        profiles:
+            - infra
+            - api
+            - worker
+            - all
         image: postgres
         hostname: postgres
         restart: always
@@ -25,6 +35,11 @@ services:
             - uservicedemo-network
 
     activemq:
+        profiles:
+            - infra
+            - api
+            - worker
+            - all
         image: apache/activemq-classic
         hostname: activemq
         restart: always
@@ -36,7 +51,33 @@ services:
         networks:
             - uservicedemo-network
 
+    elasticsearch:
+        profiles:
+            - infra
+            - api
+            - worker
+            - all
+        image: docker.elastic.co/elasticsearch/elasticsearch:8.16.1
+        restart: always
+        ports:
+            - 9200:9200
+        environment:
+            - node.name=es01
+            - cluster.name=${ELASTIC_CLUSTER_NAME}
+            - discovery.type=single-node
+            - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+            - bootstrap.memory_lock=true
+            - 'ES_JAVA_OPTS=-Xms4g -Xmx4g'
+            - xpack.security.enabled=false
+            - xpack.security.enrollment.enabled=false
+            - xpack.license.self_generated.type=${ELASTIC_LICENSE}
+        networks:
+            - uservicedemo-network
+
     uservicedemo-api:
+        profiles:
+            - api
+            - all
         depends_on:
             - activemq
             - mongo
@@ -53,10 +94,16 @@ services:
             AGTEC_ActiveMQ__ConnectionString: ${AMQ_CONN_STR}
             AGTEC_DocumentDBConfiguration__ConnectionString: ${MONGO_CONN_STR}
             AGTEC_DocumentDBConfiguration__Database: ${MONGO_DB_NAME}
+            AGTEC_SearchDBConfiguration__Username: ${ELASTIC_USERNAME}
+            AGTEC_SearchDBConfiguration__Password: ${ELASTIC_PASSWORD}
+            AGTEC_SearchDBConfiguration__Host: ${ELASTIC_HOSTS}
         networks:
             - uservicedemo-network
 
     uservicedemo-worker:
+        profiles:
+            - worker
+            - all
         depends_on:
             - activemq
             - mongo
@@ -71,6 +118,9 @@ services:
             AGTEC_ActiveMQ__ConnectionString: ${AMQ_CONN_STR}
             AGTEC_DocumentDBConfiguration__ConnectionString: ${MONGO_CONN_STR}
             AGTEC_DocumentDBConfiguration__Database: ${MONGO_DB_NAME}
+            AGTEC_SearchDBConfiguration__Username: ${ELASTIC_USERNAME}
+            AGTEC_SearchDBConfiguration__Password: ${ELASTIC_PASSWORD}
+            AGTEC_SearchDBConfiguration__Host: ${ELASTIC_HOSTS}
         networks:
             - uservicedemo-network
 

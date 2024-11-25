@@ -44,6 +44,7 @@ internal class WeatherForecastCreatedEventHandler : IEventHandler<WeatherForecas
             weatherForecastDocument.Date = weatherForecastEntity.Date;
             weatherForecastDocument.Temperature = weatherForecastEntity.Temperature;
             weatherForecastDocument.Summary = weatherForecastEntity.Summary;
+            weatherForecastDocument.UpdatedBy = weatherForecastEntity.UpdatedBy;
 
             if (weatherForecastEntity.Wind != null)
             {

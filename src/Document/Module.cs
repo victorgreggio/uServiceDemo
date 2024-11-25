@@ -33,8 +33,8 @@ public static class Module
         services.AddSingleton<ISearchDbConfiguration>(searchDbConfiguration);
 
         // Context
-        services.AddTransient<IDocumentContext, DocumentContext>();
-        services.AddTransient<ISearchContext, SearchContext>();
+        services.AddSingleton<IDocumentContext, DocumentContext>();
+        services.AddSingleton<ISearchContext, SearchContext>();
 
         // Repositories
         services.AddTransient<IWeatherForecastDocReadOnlyRepository, WeatherForecastDocReadOnlyRepository>();
