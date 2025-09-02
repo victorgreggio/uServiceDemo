@@ -3,6 +3,6 @@ using uServiceDemo.Document.Entities;
 
 namespace uServiceDemo.Document;
 
-public interface IWeatherForecastSearchReadOnlyRepository : IReadOnlyRepository<WeatherForecastDoc, ISearchContext>
+public interface IWeatherForecastSearchReadOnlyRepository : IReadOnlyRepository<WeatherForecastDoc>
 {
 }

@@ -1,29 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using AGTec.Common.Base.Accessors;
+﻿using AGTec.Common.Base.Accessors;
 using AGTec.Common.Base.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using StackExchange.Profiling;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using uServiceDemo.Application.Exceptions;
 using uServiceDemo.Application.UseCases.AddWeatherForecast.V1;
 using uServiceDemo.Application.UseCases.GetWeatherForecast.V1;
 using uServiceDemo.Application.UseCases.ListWeatherForecasts.V1;
+using uServiceDemo.Application.UseCases.SearchWeatherForecast.V1;
 using uServiceDemo.Application.UseCases.UpdateWeatherForecast.V1;
 using uServiceDemo.Contracts;
 using uServiceDemo.Contracts.Requests;
 
-namespace uServiceDemo.Api.Controllers.V1;
+namespace uServiceDemo.Api.Controllers;
 
 [ApiController]
-[ApiVersion(Version)]
-[Route("api/{version:apiVersion}/[controller]")]
+[Route("api/[controller]")]
 public class WeatherForecastController : ControllerBase
 {
-    private const string Version = "1.0";
     private readonly ILogger<WeatherForecastController> _logger;
 
     private readonly IServiceProvider _serviceProvider;
@@ -68,7 +67,7 @@ public class WeatherForecastController : ControllerBase
         {
             var useCase = _serviceProvider.GetService<IAddWeatherForecastUseCase>();
             var result = await useCase.Execute(input, PrincipalAccessor.Principal.GetUsernameFromClaim());
-            return CreatedAtAction(nameof(Get), new { version = Version, id = result }, input);
+            return CreatedAtAction(nameof(Get), new { id = result }, input);
         }
         catch (Exception e)
         {
@@ -115,6 +114,31 @@ public class WeatherForecastController : ControllerBase
             var useCase = _serviceProvider.GetService<IUpdateWeatherForecastUseCase>();
             await useCase.Execute(id, input, PrincipalAccessor.Principal.GetUsernameFromClaim());
             return Ok();
+        }
+        catch (NotFoundException ex)
+        {
+            _logger.LogWarning(ex, ex.Message);
+            return NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, ex.Message);
+            return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+        }
+    }
+
+    [HttpGet("search")]
+    [ProducesResponseType(200, Type = typeof(IEnumerable<WeatherForecast>))]
+    [ProducesResponseType(401)]
+    [ProducesResponseType(404)]
+    [ProducesResponseType(500)]
+    public async Task<IActionResult> Search([FromQuery] string term)
+    {
+        try
+        {
+            var useCase = _serviceProvider.GetService<ISearchWeatherForecastUseCase>();
+            var result = await useCase.Execute(term);
+            return Ok(result);
         }
         catch (NotFoundException ex)
         {
