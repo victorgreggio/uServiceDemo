@@ -1,14 +1,36 @@
 ﻿var builder = DistributedApplication.CreateBuilder(args);
 
-var mongodb = builder.AddMongoDB("mongo").WithDataVolume().AddDatabase("uServiceDemo");
+var insights = builder.AddAzureApplicationInsights("ApplicationInsights");
+var postgres = builder.AddPostgres("Postgres").AddDatabase("WeatherforecastDB");
+var mongodb = builder.AddMongoDB("MongoDB").AddDatabase("MongoWeatherforecastDocumentDB");
+var azureServiceBus = builder.AddAzureServiceBus("AzureServiceBus");
+var elasticsearch = builder.AddElasticsearch("Elasticsearch");
 
-
-var apiService = builder.AddProject<Projects.uServiceDemo_Api>("apiService")
+// Api
+builder.AddProject<Projects.uServiceDemo_Api>("api")
+    .WithReference(insights)
+    .WaitFor(insights)
+    .WithReference(postgres)
+    .WaitFor(postgres)
     .WithReference(mongodb)
-    .WaitFor(mongodb);
+    .WaitFor(mongodb)
+    .WithReference(azureServiceBus)
+    .WaitFor(azureServiceBus)
+    .WithReference(elasticsearch)
+    .WaitFor(elasticsearch);
 
-
-var workerService = builder.AddProject<Projects.uServiceDemo_Worker>("workerService");
+// Worker
+builder.AddProject<Projects.uServiceDemo_Worker>("worker")
+    .WithReference(insights)
+    .WaitFor(insights)
+    .WithReference(postgres)
+    .WaitFor(postgres)
+    .WithReference(mongodb)
+    .WaitFor(mongodb)
+    .WithReference(azureServiceBus)
+    .WaitFor(azureServiceBus)
+    .WithReference(elasticsearch)
+    .WaitFor(elasticsearch);
 
 
 builder.Build().Run();

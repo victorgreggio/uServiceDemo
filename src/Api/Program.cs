@@ -1,17 +1,17 @@
 using AGTec.Microservice;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Hosting;
+using uServiceDemo.Application;
+using uServiceDemo.Infrastructure.Repositories.Context;
 
-namespace uServiceDemo.Api;
+var builder = WebApplication.CreateBuilder(args);
+builder.AddElasticsearchClient(connectionName: "Elasticsearch");
+builder.AddMongoDBClient(connectionName: "MongoWeatherforecastDocumentDB");
+builder.Services.AddAGTecMicroservice<WeatherForecastDbContext>(builder.Configuration, builder.Environment);
+builder.Services.AddApplicationModule(builder.Configuration);
 
-public class Program
-{
-    public static void Main(string[] args)
-    {
-        CreateHostBuilder(args).Build().Run();
-    }
+var app = builder.Build();
 
-    public static IHostBuilder CreateHostBuilder(string[] args)
-    {
-        return HostBuilderFactory.CreateHostBuilder<Startup>(args);
-    }
-}
+app.UseAGTecMicroservice<WeatherForecastDbContext>(builder.Environment);
+
+app.Run();

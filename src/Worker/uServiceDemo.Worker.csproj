@@ -4,18 +4,19 @@
         <TargetFramework>net9.0</TargetFramework>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="AGTec.Worker" Version="1.0.0"/>
-    </ItemGroup>
-    <ItemGroup>
-        <ProjectReference Include="..\Application\uServiceDemo.Application.csproj"/>
-        <ProjectReference Include="..\Document\uServiceDemo.Document.csproj"/>
-        <ProjectReference Include="..\Events\uServiceDemo.Events.csproj"/>
+        <ProjectReference Include="..\Application\uServiceDemo.Application.csproj" />
+        <ProjectReference Include="..\Document\uServiceDemo.Document.csproj" />
+        <ProjectReference Include="..\Events\uServiceDemo.Events.csproj" />
     </ItemGroup>
 
     <ItemGroup>
       <Content Include="appsettings.json">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.8" />
     </ItemGroup>
 
 </Project>

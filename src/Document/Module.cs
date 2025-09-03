@@ -8,13 +8,10 @@ namespace uServiceDemo.Document;
 
 public static class Module
 {
-    public static IServiceCollection AddDocumentModule(this IServiceCollection services,
-        IConfiguration configuration)
-
+    public static IServiceCollection AddDocumentModule(this IServiceCollection services)
     {
-
         // DocDb Configuration
-        var documentDBName = configuration.GetValue<string>(Constants.Database.DocumentDBName);
+        var documentDBName = Constants.Database.DocumentDBName;
         var documentDBConfiguration = new DocumentDBConfiguration() { DatabaseName = documentDBName };
 
         if (documentDBConfiguration.IsValid() == false)

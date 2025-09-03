@@ -22,7 +22,7 @@ public static class Module
         services.AddInfrastructureModule(configuration);
 
         // DocumentDB(MongoDB)
-        services.AddDocumentModule(configuration);
+        services.AddDocumentModule();
 
         // CQRS
         var azuerServiceBusConnectionString = configuration.GetConnectionString("AzureServiceBus");
