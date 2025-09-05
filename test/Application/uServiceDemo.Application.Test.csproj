@@ -3,18 +3,19 @@
     <PropertyGroup>
         <TargetFramework>net9.0</TargetFramework>
         <IsPackable>false</IsPackable>
+        <TestProjectType>UnitTest</TestProjectType>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="AGTec.Common.Randomizer" Version="1.0.0" />
         <PackageReference Include="AGTec.Common.Test" Version="1.0.0" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
-        <PackageReference Include="MSTest.TestAdapter" Version="3.10.3" />
+        <PackageReference Include="MSTest.TestAdapter" Version="3.10.4" />
         <PackageReference Include="coverlet.collector" Version="6.0.4">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="MSTest.TestFramework" Version="3.10.3" />
+        <PackageReference Include="MSTest.TestFramework" Version="3.10.4" />
     </ItemGroup>
 
     <ItemGroup>

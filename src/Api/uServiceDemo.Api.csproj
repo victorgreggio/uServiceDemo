@@ -3,7 +3,7 @@
     <TargetFramework>net9.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="AGTec.Microservice" Version="1.0.0" />
+    <PackageReference Include="AGTec.Services.ServiceDefaults" Version="1.0.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.14.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.8">
       <PrivateAssets>all</PrivateAssets>
