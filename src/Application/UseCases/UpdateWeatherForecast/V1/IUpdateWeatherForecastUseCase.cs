@@ -6,5 +6,5 @@ namespace uServiceDemo.Application.UseCases.UpdateWeatherForecast.V1;
 
 public interface IUpdateWeatherForecastUseCase
 {
-    Task Execute(Guid id, UpdateWeatherForecastRequest input, string username);
+    Task Execute(Guid id, UpdateWeatherForecastRequest input);
 }

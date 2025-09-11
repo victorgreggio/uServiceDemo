@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using AGTec.Common.Base.Extensions;
 using AGTec.Common.CQRS.CommandHandlers;
-using AGTec.Common.CQRS.Messaging.ActiveMQ;
+using AGTec.Common.CQRS.Messaging.AzureServiceBus;
 using AGTec.Common.CQRS.Messaging.ProtoBufSerializer;
 using AGTec.Common.CQRS.QueryHandlers;
 using Microsoft.Extensions.Configuration;
@@ -22,11 +22,12 @@ public static class Module
         services.AddInfrastructureModule(configuration);
 
         // DocumentDB(MongoDB)
-        services.AddDocumentModule(configuration);
+        services.AddDocumentModule();
 
         // CQRS
+        var azuerServiceBusConnectionString = configuration.GetConnectionString("AzureServiceBus");
         services.AddProtoBufMessagingSerializer();
-        services.AddCQRSWithMessaging(configuration);
+        services.AddCQRSWithMessaging(azuerServiceBusConnectionString);
 
         // Mappers
         services.AddSingleton(MapConfig.GetMapperConfiguration().CreateMapper());

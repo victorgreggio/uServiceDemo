@@ -1,9 +1,9 @@
-﻿using System;
-using System.Threading.Tasks;
-using AGTec.Common.BackgroundTaskQueue;
-using AGTec.Common.Base.Accessors;
+﻿using AGTec.Common.BackgroundTaskQueue;
 using AGTec.Common.CQRS.Dispatchers;
 using AutoMapper;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using uServiceDemo.Application.Commands;
 using uServiceDemo.Contracts.Requests;
 using uServiceDemo.Domain.Entities;
@@ -29,12 +29,11 @@ public class AddWeatherForecastUseCase : IAddWeatherForecastUseCase
         _mapper = mapper;
     }
 
-    public async Task<Guid> Execute(AddWeatherForecastRequest input, string username)
+    public async Task<Guid> Execute(AddWeatherForecastRequest input)
     {
-        var correlationId = CorrelationIdAccessor.CorrelationId;
-        var weatherForecast = _mapper.Map(input, new WeatherForecastEntity(correlationId));
+        var weatherForecast = _mapper.Map(input, new WeatherForecastEntity(Guid.NewGuid()));
 
-        var command = new CreateWeatherForecastCommand(weatherForecast, username);
+        var command = new CreateWeatherForecastCommand(weatherForecast, Thread.CurrentPrincipal?.Identity?.Name);
         await _commandDispatcher.Execute(command);
 
         var evt = _mapper.Map<WeatherForecastEntity, WeatherForecastCreatedEvent>(weatherForecast);

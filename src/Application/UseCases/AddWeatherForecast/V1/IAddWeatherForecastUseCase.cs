@@ -6,5 +6,5 @@ namespace uServiceDemo.Application.UseCases.AddWeatherForecast.V1;
 
 public interface IAddWeatherForecastUseCase
 {
-    Task<Guid> Execute(AddWeatherForecastRequest input, string username);
+    Task<Guid> Execute(AddWeatherForecastRequest input);
 }

@@ -1,6 +1,6 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFramework>net9.0</TargetFramework>
     </PropertyGroup>
     <ItemGroup>
         <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
@@ -9,9 +9,9 @@
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="AGTec.Common.BackgroundTaskQueue" Version="1.0.0" />
-        <PackageReference Include="AGTec.Common.CQRS.Messaging.ActiveMQ" Version="1.0.0" />
+        <PackageReference Include="AGTec.Common.CQRS.Messaging.AzureServiceBus" Version="1.0.0" />
         <PackageReference Include="AGTec.Common.CQRS.Messaging.ProtoBufSerializer" Version="1.0.0" />
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.9" />
         <PackageReference Include="AutoMapper" Version="13.0.1" />
     </ItemGroup>
     <ItemGroup>

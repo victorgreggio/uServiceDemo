@@ -1,12 +1,12 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using AGTec.Common.BackgroundTaskQueue;
 using AGTec.Common.CQRS.Messaging;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace uServiceDemo.Worker.BackgroundServices;
 
-internal class WeatherTopicListenerBackgroundService : BackgroundService<int>
+internal class WeatherTopicListenerBackgroundService : BackgroundService
 {
     private const string TOPIC_NAME = "weather";
 

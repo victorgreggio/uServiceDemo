@@ -1,13 +1,14 @@
 using AGTec.Common.Repository.Search;
+using Elastic.Clients.Elasticsearch;
 using uServiceDemo.Document.Entities;
 
 namespace uServiceDemo.Document;
 
-public class WeatherForecastSearchReadOnlyRepository : ReadOnlyRepository<WeatherForecastDoc, ISearchContext>,
+public class WeatherForecastSearchReadOnlyRepository : ReadOnlyRepository<WeatherForecastDoc>,
     IWeatherForecastSearchReadOnlyRepository
 {
-    public WeatherForecastSearchReadOnlyRepository(ISearchContext context)
-        : base(context)
+    public WeatherForecastSearchReadOnlyRepository(ElasticsearchClient client)
+        : base(client)
     {
     }
 }

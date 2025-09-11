@@ -4,7 +4,7 @@ internal class Constants
 {
     public static class Database
     {
-        public const string DabaseConnectionString = "uServiceDemoDB";
+        public const string DabaseConnectionString = "WeatherforecastDB";
 
         public static class Tables
         {
