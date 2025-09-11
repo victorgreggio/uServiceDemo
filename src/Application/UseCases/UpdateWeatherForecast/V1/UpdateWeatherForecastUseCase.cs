@@ -1,8 +1,9 @@
-﻿using System;
-using System.Threading.Tasks;
-using AGTec.Common.BackgroundTaskQueue;
+﻿using AGTec.Common.BackgroundTaskQueue;
 using AGTec.Common.CQRS.Dispatchers;
 using AutoMapper;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using uServiceDemo.Application.Commands;
 using uServiceDemo.Application.Exceptions;
 using uServiceDemo.Application.Queries;
@@ -33,7 +34,7 @@ internal class UpdateWeatherForecastUseCase : IUpdateWeatherForecastUseCase
         _mapper = mapper;
     }
 
-    public async Task Execute(Guid id, UpdateWeatherForecastRequest input, string username)
+    public async Task Execute(Guid id, UpdateWeatherForecastRequest input)
     {
         var query = new GetWeatherForecastByIdQuery(id);
         var entity = await _queryDispatcher.Execute<GetWeatherForecastByIdQuery, WeatherForecastEntity>(query);
@@ -45,7 +46,7 @@ internal class UpdateWeatherForecastUseCase : IUpdateWeatherForecastUseCase
         entity.Date = input.Date;
         entity.Summary = input.Summary;
 
-        var command = new UpdateWeatherForecastCommand(entity, username);
+        var command = new UpdateWeatherForecastCommand(entity, Thread.CurrentPrincipal?.Identity?.Name);
         await _commandDispatcher.Execute(command);
 
         var evt = _mapper.Map<WeatherForecastEntity, WeatherForecastUpdatedEvent>(entity);

@@ -2,7 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using AGTec.Common.BackgroundTaskQueue;
-using AGTec.Common.Base.Accessors;
 using AGTec.Common.CQRS.Dispatchers;
 using AGTec.Common.Randomizer.Impl;
 using AGTec.Common.Test;
@@ -38,7 +37,6 @@ public class
 
         // Sets context CorrelationId
         _correlationId = Guid.NewGuid();
-        CorrelationIdAccessor.CorrelationId = _correlationId;
 
         // Test data
         _forecastDate = randomizerDate.GenerateValue();
@@ -64,8 +62,7 @@ public class
         _resultId = CreateSut()
             .Execute(
                 new AddWeatherForecastRequest
-                    { Date = _forecastDate, Summary = _forecastSummary, TemperatureInCelsius = _forecastTemperature },
-                _testUsername)
+                    { Date = _forecastDate, Summary = _forecastSummary, TemperatureInCelsius = _forecastTemperature })
             .Result;
     }
 

@@ -1,6 +1,4 @@
-using AGTec.Common.Monitor;
 using AGTec.Services.ServiceDefaults;
-using Correlate.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Hosting;
 using uServiceDemo.Api;
@@ -17,15 +15,7 @@ builder.Services.AddApplicationModule(builder.Configuration);
 
 var app = builder.Build();
 
-app.UseStaticFiles();
-app.UseRouting();
-app.UseAGTecMonitor(app.Environment);
-app.UseCorrelate();
-//app.UseAuthentication();
-//app.UseAuthorization();
-app.MapHealthChecks("/health");
-app.MapOpenApi();
-
+app.UseServiceDefaults<WeatherForecastDbContext>();
 app.MapEndpoints();
 
 app.Run();
