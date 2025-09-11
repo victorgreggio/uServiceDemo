@@ -1,15 +1,14 @@
-﻿var builder = DistributedApplication.CreateBuilder(args);
+﻿using Aspire.Hosting.Yarp.Transforms;
 
-var insights = builder.AddAzureApplicationInsights("ApplicationInsights");
+var builder = DistributedApplication.CreateBuilder(args);
+
 var postgres = builder.AddPostgres("Postgres").AddDatabase("WeatherforecastDB");
 var mongodb = builder.AddMongoDB("MongoDB").AddDatabase("MongoWeatherforecastDocumentDB");
 var azureServiceBus = builder.AddAzureServiceBus("AzureServiceBus");
 var elasticsearch = builder.AddElasticsearch("Elasticsearch");
 
 // Api
-builder.AddProject<Projects.uServiceDemo_Api>("api")
-    .WithReference(insights)
-    .WaitFor(insights)
+var api = builder.AddProject<Projects.uServiceDemo_Api>("api")
     .WithReference(postgres)
     .WaitFor(postgres)
     .WithReference(mongodb)
@@ -21,8 +20,6 @@ builder.AddProject<Projects.uServiceDemo_Api>("api")
 
 // Worker
 builder.AddProject<Projects.uServiceDemo_Worker>("worker")
-    .WithReference(insights)
-    .WaitFor(insights)
     .WithReference(postgres)
     .WaitFor(postgres)
     .WithReference(mongodb)
@@ -31,6 +28,14 @@ builder.AddProject<Projects.uServiceDemo_Worker>("worker")
     .WaitFor(azureServiceBus)
     .WithReference(elasticsearch)
     .WaitFor(elasticsearch);
+
+builder.AddYarp("ApiGateway")
+    .WithHostPort(8081)
+    .WithConfiguration(yarp =>
+    {
+        yarp.AddRoute("/api/{**catch-all}", api)
+            .WithTransformPathRemovePrefix("/api");
+    });
 
 
 builder.Build().Run();
