@@ -29,13 +29,17 @@ builder.AddProject<Projects.uServiceDemo_Worker>("worker")
     .WithReference(elasticsearch)
     .WaitFor(elasticsearch);
 
+// UI
+var ui = builder.AddProject<Projects.uServiceDemo_UI>("ui");
+
 builder.AddYarp("ApiGateway")
     .WithHostPort(8081)
     .WithConfiguration(yarp =>
     {
         yarp.AddRoute("/api/{**catch-all}", api)
             .WithTransformPathRemovePrefix("/api");
-    });
+    })
+    .WithReference(ui);
 
 
 builder.Build().Run();
