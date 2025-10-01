@@ -1,0 +1,93 @@
+@page "/weatherforecasts"
+@using uServiceDemo.Contracts
+@using uServiceDemo.UI.Services
+@inject IWeatherForecastService WeatherForecastService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Weather Forecasts</PageTitle>
+
+<h1>Weather Forecasts</h1>
+
+<p>Manage your weather forecasts.</p>
+
+<p>
+    <button class="btn btn-primary" @onclick="NavigateToCreate">Create New</button>
+</p>
+
+@if (forecasts == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (!forecasts.Any())
+{
+    <p><em>No weather forecasts found.</em></p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Temperature (C)</th>
+                <th>Temperature (F)</th>
+                <th>Summary</th>
+                <th>Created</th>
+                <th>Last Updated</th>
+                <th>Updated By</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var forecast in forecasts)
+            {
+                <tr>
+                    <td>@forecast.Date.ToShortDateString()</td>
+                    <td>@forecast.TemperatureInCelsius</td>
+                    <td>@forecast.TemperatureInFahrenheit</td>
+                    <td>@forecast.Summary</td>
+                    <td>@forecast.Created.ToShortDateString()</td>
+                    <td>@forecast.LastUpdated.ToShortDateString()</td>
+                    <td>@forecast.UpdatedBy</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" @onclick="() => NavigateToEdit(forecast.Id)">Edit</button>
+                        <button class="btn btn-sm btn-danger" @onclick="() => DeleteForecast(forecast.Id)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IEnumerable<WeatherForecast>? forecasts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadForecasts();
+    }
+
+    private async Task LoadForecasts()
+    {
+        forecasts = await WeatherForecastService.GetAllAsync();
+    }
+
+    private void NavigateToCreate()
+    {
+        NavigationManager.NavigateTo("/weatherforecasts/create");
+    }
+
+    private void NavigateToEdit(Guid id)
+    {
+        NavigationManager.NavigateTo($"/weatherforecasts/edit/{id}");
+    }
+
+    private async Task DeleteForecast(Guid id)
+    {
+        if (await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this forecast?"))
+        {
+            await WeatherForecastService.DeleteAsync(id);
+            await LoadForecasts();
+        }
+    }
+}

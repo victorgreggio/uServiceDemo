@@ -1,0 +1,77 @@
+@page "/weatherforecasts/create"
+@using uServiceDemo.Contracts.Requests
+@using uServiceDemo.UI.Services
+@inject IWeatherForecastService WeatherForecastService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create Weather Forecast</PageTitle>
+
+<h1>Create Weather Forecast</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <EditForm Model="@model" OnValidSubmit="@HandleValidSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="mb-3">
+                <label for="date" class="form-label">Date</label>
+                <InputDate id="date" @bind-Value="model.Date" class="form-control" />
+                <ValidationMessage For="@(() => model.Date)" />
+            </div>
+
+            <div class="mb-3">
+                <label for="temperature" class="form-label">Temperature (Celsius)</label>
+                <InputNumber id="temperature" @bind-Value="model.TemperatureInCelsius" class="form-control" />
+                <ValidationMessage For="@(() => model.TemperatureInCelsius)" />
+            </div>
+
+            <div class="mb-3">
+                <label for="summary" class="form-label">Summary</label>
+                <InputText id="summary" @bind-Value="model.Summary" class="form-control" />
+                <ValidationMessage For="@(() => model.Summary)" />
+            </div>
+
+            <div class="mb-3">
+                <button type="submit" class="btn btn-primary">Create</button>
+                <button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+            </div>
+
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="alert alert-danger" role="alert">
+                    @errorMessage
+                </div>
+            }
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private AddWeatherForecastRequest model = new()
+    {
+        Date = DateTime.Today,
+        Summary = string.Empty
+    };
+
+    private string? errorMessage;
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            errorMessage = null;
+            await WeatherForecastService.CreateAsync(model);
+            NavigationManager.NavigateTo("/weatherforecasts");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error creating weather forecast: {ex.Message}";
+        }
+    }
+
+    private void Cancel()
+    {
+        NavigationManager.NavigateTo("/weatherforecasts");
+    }
+}

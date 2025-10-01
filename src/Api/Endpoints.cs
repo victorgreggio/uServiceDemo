@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using uServiceDemo.Application.UseCases.AddWeatherForecast.V1;
+using uServiceDemo.Application.UseCases.DeleteWeatherForecast.V1;
 using uServiceDemo.Application.UseCases.GetWeatherForecast.V2;
 using uServiceDemo.Application.UseCases.ListWeatherForecasts.V1;
 using uServiceDemo.Application.UseCases.UpdateWeatherForecast.V1;
@@ -49,6 +50,14 @@ public static class Endpoints
         .Produces(StatusCodes.Status500InternalServerError)
         .WithName("UpdateWeatherForecast")
         .WithSummary("Updates an existing weather forecast")
+        .WithOpenApi();
+
+        group.MapDelete("/{id:guid}", (Guid id, IDeleteWeatherForecastUseCase useCase, ILogger<IDeleteWeatherForecastUseCase> logger) =>
+            TryAndCatch(async () => await useCase.Execute(id), logger))
+        .Produces(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status500InternalServerError)
+        .WithName("DeleteWeatherForecast")
+        .WithSummary("Deletes a weather forecast")
         .WithOpenApi();
 
         return app;
