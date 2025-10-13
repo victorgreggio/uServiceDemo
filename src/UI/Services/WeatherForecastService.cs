@@ -7,7 +7,7 @@ namespace uServiceDemo.UI.Services;
 public class WeatherForecastService : IWeatherForecastService
 {
     private readonly HttpClient _httpClient;
-    private const string BaseUrl = "/api/weatherforecast";
+    private const string BaseUrl = "/weatherforecast";
 
     public WeatherForecastService(HttpClient httpClient)
     {

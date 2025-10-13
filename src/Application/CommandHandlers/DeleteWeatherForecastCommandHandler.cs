@@ -1,5 +1,8 @@
+using System.Linq;
 using System.Threading.Tasks;
 using AGTec.Common.CQRS.CommandHandlers;
+using AGTec.Common.Repository.Extensions;
+using Microsoft.EntityFrameworkCore;
 using uServiceDemo.Application.Commands;
 using uServiceDemo.Infrastructure.Repositories;
 
@@ -14,9 +17,16 @@ internal class DeleteWeatherForecastCommandHandler : ICommandHandler<DeleteWeath
         _repository = repository;
     }
 
-    public Task Execute(DeleteWeatherForecastCommand command)
+    public async Task Execute(DeleteWeatherForecastCommand command)
     {
-        return _repository.Delete(command.Id);
+        var entity = await _repository
+            .Select(x => x.Id == command.Id)
+            .FirstOrDefaultAsync();
+            
+        if (entity != null)
+        {
+            await _repository.Delete(entity);
+        }
     }
 
     public void Dispose()

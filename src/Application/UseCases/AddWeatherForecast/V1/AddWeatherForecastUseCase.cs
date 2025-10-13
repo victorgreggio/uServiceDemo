@@ -36,10 +36,18 @@ public class AddWeatherForecastUseCase : IAddWeatherForecastUseCase
         var command = new CreateWeatherForecastCommand(weatherForecast, Thread.CurrentPrincipal?.Identity?.Name);
         await _commandDispatcher.Execute(command);
 
-        var evt = _mapper.Map<WeatherForecastEntity, WeatherForecastCreatedEvent>(weatherForecast);
+        try
+        {
+            var evt = _mapper.Map<WeatherForecastEntity, WeatherForecastCreatedEvent>(weatherForecast);
 
-        _backgroundTaskQueue.Queue($"Publishing WeatherForecastCreatedEvent for {evt.Id}",
-            cancelationToken => _eventDispatcher.Raise(evt));
+            _backgroundTaskQueue.Queue($"Publishing WeatherForecastCreatedEvent for {evt.Id}",
+                cancelationToken => _eventDispatcher.Raise(evt));
+        }
+        catch (Exception)
+        {
+            // Log error but don't fail the request - event publishing is not critical for the operation
+            // TODO: Implement proper logging when Service Bus is configured
+        }
 
         return weatherForecast.Id;
     }

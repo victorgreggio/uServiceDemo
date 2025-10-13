@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using System;
 using uServiceDemo.Contracts;
 using uServiceDemo.Contracts.Requests;
 using uServiceDemo.Document.Entities;
@@ -13,8 +14,10 @@ internal static class MapConfig
     {
         return new MapperConfiguration(cfg =>
         {
-            cfg.CreateMap<AddWeatherForecastRequest, WeatherForecastEntity>().ForMember(
-                dest => dest.Temperature, opts => opts.MapFrom(source => source.TemperatureInCelsius));
+            cfg.CreateMap<AddWeatherForecastRequest, WeatherForecastEntity>()
+                .ForMember(dest => dest.Temperature, opts => opts.MapFrom(source => source.TemperatureInCelsius))
+                .ForMember(dest => dest.Date, opts => opts.MapFrom(source => 
+                    source.Date.Kind == DateTimeKind.Utc ? source.Date : source.Date.ToUniversalTime()));
             cfg.CreateMap<WeatherForecastEntity, WeatherForecast>()
                 .ForMember(dest => dest.TemperatureInCelsius, opts => opts.MapFrom(source => source.Temperature));
             cfg.CreateMap<WeatherForecast, WeatherForecastEntity>();

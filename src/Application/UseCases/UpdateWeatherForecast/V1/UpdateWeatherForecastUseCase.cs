@@ -43,15 +43,23 @@ internal class UpdateWeatherForecastUseCase : IUpdateWeatherForecastUseCase
             throw new NotFoundException($"No weather forecast found with ID = '{id}'.");
 
         entity.Temperature = input.TemperatureInCelsius;
-        entity.Date = input.Date;
+        entity.Date = input.Date.Kind == DateTimeKind.Utc ? input.Date : input.Date.ToUniversalTime();
         entity.Summary = input.Summary;
 
         var command = new UpdateWeatherForecastCommand(entity, Thread.CurrentPrincipal?.Identity?.Name);
         await _commandDispatcher.Execute(command);
 
-        var evt = _mapper.Map<WeatherForecastEntity, WeatherForecastUpdatedEvent>(entity);
+        try
+        {
+            var evt = _mapper.Map<WeatherForecastEntity, WeatherForecastUpdatedEvent>(entity);
 
-        _backgroundTaskQueue.Queue($"Publishing WeatherForecastUpdatedEvent for {evt.Id}",
-            cancelationToken => _eventDispatcher.Raise(evt));
+            _backgroundTaskQueue.Queue($"Publishing WeatherForecastUpdatedEvent for {evt.Id}",
+                cancelationToken => _eventDispatcher.Raise(evt));
+        }
+        catch (Exception)
+        {
+            // Log error but don't fail the request - event publishing is not critical for the operation
+            // TODO: Implement proper logging when Service Bus is configured
+        }
     }
 }
