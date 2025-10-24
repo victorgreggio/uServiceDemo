@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.Extensions.Logging.Abstractions;
 using System;
 using uServiceDemo.Contracts;
 using uServiceDemo.Contracts.Requests;
@@ -16,7 +17,7 @@ internal static class MapConfig
         {
             cfg.CreateMap<AddWeatherForecastRequest, WeatherForecastEntity>()
                 .ForMember(dest => dest.Temperature, opts => opts.MapFrom(source => source.TemperatureInCelsius))
-                .ForMember(dest => dest.Date, opts => opts.MapFrom(source => 
+                .ForMember(dest => dest.Date, opts => opts.MapFrom(source =>
                     source.Date.Kind == DateTimeKind.Utc ? source.Date : source.Date.ToUniversalTime()));
             cfg.CreateMap<WeatherForecastEntity, WeatherForecast>()
                 .ForMember(dest => dest.TemperatureInCelsius, opts => opts.MapFrom(source => source.Temperature));
@@ -25,6 +26,6 @@ internal static class MapConfig
             cfg.CreateMap<WeatherForecastEntity, WeatherForecastUpdatedEvent>();
             cfg.CreateMap<WeatherForecastDoc, WeatherForecast>()
                 .ForMember(dest => dest.TemperatureInCelsius, opts => opts.MapFrom(source => source.Temperature));
-        });
+        }, NullLoggerFactory.Instance);
     }
 }

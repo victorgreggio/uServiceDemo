@@ -1,0 +1,98 @@
+@page "/weatherforecasts/view/{id:guid}"
+@using uServiceDemo.Contracts
+@using uServiceDemo.UI.Services
+@inject IWeatherForecastService WeatherForecastService
+@inject NavigationManager NavigationManager
+
+<PageTitle>View Weather Forecast</PageTitle>
+
+<h1>Weather Forecast Details</h1>
+
+@if (forecast == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @errorMessage
+    </div>
+    <button class="btn btn-secondary" @onclick="BackToList">Back to List</button>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Forecast Information</h3>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-3">ID</dt>
+                        <dd class="col-sm-9">@forecast.Id</dd>
+
+                        <dt class="col-sm-3">Date</dt>
+                        <dd class="col-sm-9">@forecast.Date.ToString("dddd, MMMM dd, yyyy")</dd>
+
+                        <dt class="col-sm-3">Temperature (Celsius)</dt>
+                        <dd class="col-sm-9">@forecast.TemperatureInCelsius°C</dd>
+
+                        <dt class="col-sm-3">Temperature (Fahrenheit)</dt>
+                        <dd class="col-sm-9">@forecast.TemperatureInFahrenheit°F</dd>
+
+                        <dt class="col-sm-3">Summary</dt>
+                        <dd class="col-sm-9">@forecast.Summary</dd>
+
+                        <dt class="col-sm-3">Created</dt>
+                        <dd class="col-sm-9">@forecast.Created.ToString("f")</dd>
+
+                        <dt class="col-sm-3">Last Updated</dt>
+                        <dd class="col-sm-9">@forecast.LastUpdated.ToString("f")</dd>
+
+                        <dt class="col-sm-3">Updated By</dt>
+                        <dd class="col-sm-9">@forecast.UpdatedBy</dd>
+                    </dl>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-primary" @onclick="EditForecast">Edit</button>
+                    <button class="btn btn-secondary" @onclick="BackToList">Back to List</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private WeatherForecast? forecast;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            forecast = await WeatherForecastService.GetByIdAsync(Id);
+            if (forecast == null)
+            {
+                errorMessage = "Weather forecast not found.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error loading weather forecast: {ex.Message}";
+        }
+    }
+
+    private void EditForecast()
+    {
+        NavigationManager.NavigateTo($"/weatherforecasts/edit/{Id}");
+    }
+
+    private void BackToList()
+    {
+        NavigationManager.NavigateTo("/weatherforecasts");
+    }
+}

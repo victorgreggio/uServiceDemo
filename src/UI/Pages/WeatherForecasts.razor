@@ -1,4 +1,5 @@
 @page "/weatherforecasts"
+@using Microsoft.AspNetCore.Components.Web
 @using uServiceDemo.Contracts
 @using uServiceDemo.UI.Services
 @inject IWeatherForecastService WeatherForecastService
@@ -11,9 +12,18 @@
 
 <p>Manage your weather forecasts.</p>
 
-<p>
-    <button class="btn btn-primary" @onclick="NavigateToCreate">Create New</button>
-</p>
+<div class="row mb-3">
+    <div class="col-md-8">
+        <div class="input-group">
+            <input type="text" class="form-control" placeholder="Search by summary..." @bind="searchTerm" @bind:event="oninput" @onkeydown="HandleSearchKeyDown" />
+            <button class="btn btn-outline-secondary" type="button" @onclick="SearchForecasts">Search</button>
+            <button class="btn btn-outline-secondary" type="button" @onclick="ClearSearch">Clear</button>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <button class="btn btn-primary" @onclick="NavigateToCreate">Create New</button>
+    </div>
+</div>
 
 @if (forecasts == null)
 {
@@ -50,6 +60,7 @@ else
                     <td>@forecast.LastUpdated.ToShortDateString()</td>
                     <td>@forecast.UpdatedBy</td>
                     <td>
+                        <button class="btn btn-sm btn-info" @onclick="() => NavigateToView(forecast.Id)">View</button>
                         <button class="btn btn-sm btn-primary" @onclick="() => NavigateToEdit(forecast.Id)">Edit</button>
                         <button class="btn btn-sm btn-danger" @onclick="() => DeleteForecast(forecast.Id)">Delete</button>
                     </td>
@@ -61,6 +72,8 @@ else
 
 @code {
     private IEnumerable<WeatherForecast>? forecasts;
+    private string searchTerm = string.Empty;
+    private bool isSearchMode = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -70,11 +83,50 @@ else
     private async Task LoadForecasts()
     {
         forecasts = await WeatherForecastService.GetAllAsync();
+        isSearchMode = false;
+    }
+
+    private async Task SearchForecasts()
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            await LoadForecasts();
+            return;
+        }
+
+        try
+        {
+            forecasts = await WeatherForecastService.SearchAsync(searchTerm);
+            isSearchMode = true;
+        }
+        catch
+        {
+            forecasts = Array.Empty<WeatherForecast>();
+        }
+    }
+
+    private async Task ClearSearch()
+    {
+        searchTerm = string.Empty;
+        await LoadForecasts();
+    }
+
+    private async Task HandleSearchKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await SearchForecasts();
+        }
     }
 
     private void NavigateToCreate()
     {
         NavigationManager.NavigateTo("/weatherforecasts/create");
+    }
+
+    private void NavigateToView(Guid id)
+    {
+        NavigationManager.NavigateTo($"/weatherforecasts/view/{id}");
     }
 
     private void NavigateToEdit(Guid id)
@@ -87,7 +139,14 @@ else
         if (await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this forecast?"))
         {
             await WeatherForecastService.DeleteAsync(id);
-            await LoadForecasts();
+            if (isSearchMode && !string.IsNullOrWhiteSpace(searchTerm))
+            {
+                await SearchForecasts();
+            }
+            else
+            {
+                await LoadForecasts();
+            }
         }
     }
 }

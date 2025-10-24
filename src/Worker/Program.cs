@@ -10,11 +10,15 @@ using uServiceDemo.Worker.EventHandlers;
 
 var builder = Host.CreateApplicationBuilder(args);
 
+builder.AddElasticsearchClient(connectionName: "Elasticsearch");
+builder.AddMongoDBClient(connectionName: "MongoWeatherforecastDocumentDB");
+
 builder.Services.AddDocumentModule();
 builder.Services.AddApplicationModule(builder.Configuration);
 builder.Services.AddTransient<IBackgroundTaskQueue, BackgroundTaskQueue>();
 builder.Services.AddTransient<IEventHandler<WeatherForecastCreatedEvent>, WeatherForecastCreatedEventHandler>();
 builder.Services.AddTransient<IEventHandler<WeatherForecastUpdatedEvent>, WeatherForecastUpdatedEventHandler>();
+builder.Services.AddTransient<IEventHandler<WeatherForecastDeletedEvent>, WeatherForecastDeletedEventHandler>();
 builder.Services.AddHostedService<WeatherTopicListenerBackgroundService>();
 
 builder.Build().Run();

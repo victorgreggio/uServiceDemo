@@ -25,6 +25,12 @@ public class WeatherForecastService : IWeatherForecastService
         return await _httpClient.GetFromJsonAsync<WeatherForecast>($"{BaseUrl}/{id}");
     }
 
+    public async Task<IEnumerable<WeatherForecast>> SearchAsync(string term)
+    {
+        var response = await _httpClient.GetFromJsonAsync<IEnumerable<WeatherForecast>>($"{BaseUrl}/search?term={Uri.EscapeDataString(term)}");
+        return response ?? Array.Empty<WeatherForecast>();
+    }
+
     public async Task<Guid> CreateAsync(AddWeatherForecastRequest request)
     {
         var response = await _httpClient.PostAsJsonAsync(BaseUrl, request);

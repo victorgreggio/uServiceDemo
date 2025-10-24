@@ -8,6 +8,7 @@ using uServiceDemo.Application.UseCases.AddWeatherForecast.V1;
 using uServiceDemo.Application.UseCases.DeleteWeatherForecast.V1;
 using uServiceDemo.Application.UseCases.GetWeatherForecast.V2;
 using uServiceDemo.Application.UseCases.ListWeatherForecasts.V1;
+using uServiceDemo.Application.UseCases.SearchWeatherForecast.V1;
 using uServiceDemo.Application.UseCases.UpdateWeatherForecast.V1;
 using uServiceDemo.Contracts;
 using uServiceDemo.Contracts.Requests;
@@ -26,6 +27,14 @@ public static class Endpoints
         .Produces(StatusCodes.Status500InternalServerError)
         .WithName("ListWeatherForecasts")
         .WithSummary("List weather forecasts")
+        .WithOpenApi();
+
+        group.MapGet("/search", (string term, ISearchWeatherForecastUseCase useCase, ILogger<ISearchWeatherForecastUseCase> logger) =>
+            TryAndCatch(async () => await useCase.Execute(term), logger))
+        .Produces<IEnumerable<WeatherForecast>>(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status500InternalServerError)
+        .WithName("SearchWeatherForecasts")
+        .WithSummary("Search weather forecasts by term")
         .WithOpenApi();
 
         group.MapGet("/{id:guid}", (Guid id, IGetWeatherForecastUseCase useCase, ILogger<IGetWeatherForecastUseCase> logger) =>

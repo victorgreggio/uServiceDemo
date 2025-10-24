@@ -10,7 +10,7 @@ if (builder.Environment.IsDevelopment())
 }
 
 var postgres = builder.AddPostgres("Postgres").AddDatabase("WeatherforecastDB");
-var mongodb = builder.AddMongoDB("MongoDB").AddDatabase("MongoWeatherforecastDB");
+var mongodb = builder.AddMongoDB("MongoDB").AddDatabase("MongoWeatherforecastDocumentDB");
 var azureServiceBus = builder.AddAzureServiceBus("AzureServiceBus");
 var elasticsearch = builder.AddElasticsearch("Elasticsearch");
 

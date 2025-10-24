@@ -11,8 +11,8 @@
         <PackageReference Include="AGTec.Common.BackgroundTaskQueue" Version="1.0.0" />
         <PackageReference Include="AGTec.Common.CQRS.Messaging.AzureServiceBus" Version="1.0.0" />
         <PackageReference Include="AGTec.Common.CQRS.Messaging.ProtoBufSerializer" Version="1.0.0" />
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.9" />
-        <PackageReference Include="AutoMapper" Version="13.0.1" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.10" />
+        <PackageReference Include="AutoMapper" Version="15.0.1" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\Contracts\uServiceDemo.Contracts.csproj" />
