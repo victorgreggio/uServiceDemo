@@ -45,18 +45,16 @@ var authorizedUrls = builder.Configuration.GetSection("Api:BaseUrls").Get<string
 
 System.Console.WriteLine($"Authorized URLs: {string.Join(", ", authorizedUrls)}");
 
-builder.Services.AddScoped(sp =>
-{
-    var handler = sp.GetRequiredService<AuthorizationMessageHandler>();
-    handler.ConfigureHandler(
-        authorizedUrls: authorizedUrls,
-        scopes: scopes);
-    return handler;
-});
-
 builder.Services.AddHttpClient("API", 
     client => client.BaseAddress = new Uri(apiBaseUrl))
-    .AddHttpMessageHandler<AuthorizationMessageHandler>();
+    .AddHttpMessageHandler(sp =>
+    {
+        var handler = sp.GetRequiredService<AuthorizationMessageHandler>();
+        handler.ConfigureHandler(
+            authorizedUrls: authorizedUrls,
+            scopes: scopes);
+        return handler;
+    });
 
 builder.Services.AddScoped(sp => 
     sp.GetRequiredService<IHttpClientFactory>().CreateClient("API"));

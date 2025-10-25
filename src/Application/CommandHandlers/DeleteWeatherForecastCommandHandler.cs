@@ -8,7 +8,7 @@ using uServiceDemo.Infrastructure.Repositories;
 
 namespace uServiceDemo.Application.CommandHandlers;
 
-internal class DeleteWeatherForecastCommandHandler : ICommandHandler<DeleteWeatherForecastCommand>
+public class DeleteWeatherForecastCommandHandler : ICommandHandler<DeleteWeatherForecastCommand>
 {
     private readonly IWeatherForecastRepository _repository;
 

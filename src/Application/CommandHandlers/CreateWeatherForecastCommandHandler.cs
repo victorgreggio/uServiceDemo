@@ -5,7 +5,7 @@ using uServiceDemo.Infrastructure.Repositories;
 
 namespace uServiceDemo.Application.CommandHandlers;
 
-internal class CreateWeatherForecastCommandHandler : ICommandHandler<CreateWeatherForecastCommand>
+public class CreateWeatherForecastCommandHandler : ICommandHandler<CreateWeatherForecastCommand>
 {
     private readonly IWeatherForecastRepository _repository;
 

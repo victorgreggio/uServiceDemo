@@ -8,7 +8,7 @@ using uServiceDemo.Infrastructure.Repositories;
 
 namespace uServiceDemo.Application.QueryHandlers;
 
-internal class
+public class
     ListAllWeatherForecastQueryHandler : IQueryHandler<ListAllWeatherForecastQuery, IEnumerable<WeatherForecastEntity>>
 {
     private readonly IWeatherForecastReadOnlyRepository _readOnlyRespository;

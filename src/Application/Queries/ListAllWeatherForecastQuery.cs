@@ -4,6 +4,6 @@ using uServiceDemo.Domain.Entities;
 
 namespace uServiceDemo.Application.Queries;
 
-internal class ListAllWeatherForecastQuery : IQuery<IEnumerable<WeatherForecastEntity>>
+public class ListAllWeatherForecastQuery : IQuery<IEnumerable<WeatherForecastEntity>>
 {
 }

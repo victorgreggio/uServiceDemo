@@ -11,7 +11,7 @@ using uServiceDemo.Events;
 
 namespace uServiceDemo.Application.UseCases.DeleteWeatherForecast.V1;
 
-internal class DeleteWeatherForecastUseCase : IDeleteWeatherForecastUseCase
+public class DeleteWeatherForecastUseCase : IDeleteWeatherForecastUseCase
 {
     private readonly IBackgroundTaskQueue _backgroundTaskQueue;
     private readonly ICommandDispatcher _commandDispatcher;

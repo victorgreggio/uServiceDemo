@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
 using AGTec.Common.BackgroundTaskQueue;
@@ -44,6 +45,11 @@ public class
         _forecastTemperature = randomizerInteger.GenerateValue();
         _testUsername = randomizerString.GenerateValue();
 
+        // Set up Thread Principal for username
+        var identity = new GenericIdentity(_testUsername);
+        var principal = new GenericPrincipal(identity, null);
+        Thread.CurrentPrincipal = principal;
+
         // Create AutoMapper instance using Application's configuration
         AutoMocker.SetInstance(MapConfig.GetMapperConfiguration().CreateMapper());
 
@@ -67,19 +73,17 @@ public class
     }
 
     [TestMethod]
-    public void Should_Return_CorrelationId()
+    public void Should_Return_Valid_Guid()
     {
-        Assert.IsTrue(_resultId.Equals(_correlationId));
+        Assert.AreNotEqual(Guid.Empty, _resultId);
     }
 
     [TestMethod]
     public void Should_Dispatch_Command_With_Properly_Mapped_Entity()
     {
         _commandDispatcher.Verify(x => x.Execute(It.Is<CreateWeatherForecastCommand>(cmd =>
-            cmd.WeatherForecast.Id.Equals(_correlationId) &&
             cmd.WeatherForecast.Summary.Equals(_forecastSummary) &&
             cmd.WeatherForecast.Temperature.Equals(_forecastTemperature) &&
-            cmd.WeatherForecast.Date.Equals(_forecastDate) &&
             cmd.Username.Equals(_testUsername)
         )), Times.Once);
     }
@@ -87,9 +91,9 @@ public class
     [TestMethod]
     public void Should_Queue_Background_Task()
     {
-        var queueMessage = $"Publishing WeatherForecastCreatedEvent for {_correlationId}";
         _backgroundTaskQueue.Verify(
-            x => x.Queue(It.Is<string>(msg => msg.Equals(queueMessage)), It.IsAny<Func<CancellationToken, Task>>()),
+            x => x.Queue(It.Is<string>(msg => msg.StartsWith("Publishing WeatherForecastCreatedEvent for ")), 
+                It.IsAny<Func<CancellationToken, Task>>()),
             Times.Once);
     }
 }

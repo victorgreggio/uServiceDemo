@@ -3,7 +3,7 @@ using System;
 
 namespace uServiceDemo.Application.Commands;
 
-internal class DeleteWeatherForecastCommand : ICommand
+public class DeleteWeatherForecastCommand : ICommand
 {
     public DeleteWeatherForecastCommand(Guid id, string username)
     {

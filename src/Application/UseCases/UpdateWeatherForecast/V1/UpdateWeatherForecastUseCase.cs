@@ -13,7 +13,7 @@ using uServiceDemo.Events;
 
 namespace uServiceDemo.Application.UseCases.UpdateWeatherForecast.V1;
 
-internal class UpdateWeatherForecastUseCase : IUpdateWeatherForecastUseCase
+public class UpdateWeatherForecastUseCase : IUpdateWeatherForecastUseCase
 {
     private readonly IBackgroundTaskQueue _backgroundTaskQueue;
     private readonly ICommandDispatcher _commandDispatcher;

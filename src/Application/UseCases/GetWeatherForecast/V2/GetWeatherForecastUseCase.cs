@@ -9,7 +9,7 @@ using uServiceDemo.Document.Entities;
 
 namespace uServiceDemo.Application.UseCases.GetWeatherForecast.V2;
 
-internal class GetWeatherForecastUseCase : IGetWeatherForecastUseCase
+public class GetWeatherForecastUseCase : IGetWeatherForecastUseCase
 {
     private readonly IMapper _mapper;
     private readonly IQueryDispatcher _queryDispatcher;

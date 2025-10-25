@@ -8,7 +8,7 @@ using uServiceDemo.Infrastructure.Repositories;
 
 namespace uServiceDemo.Application.QueryHandlers;
 
-internal class GetWeatherForecastByIdQueryHandler : IQueryHandler<GetWeatherForecastByIdQuery, WeatherForecastEntity>
+public class GetWeatherForecastByIdQueryHandler : IQueryHandler<GetWeatherForecastByIdQuery, WeatherForecastEntity>
 {
     private readonly IWeatherForecastReadOnlyRepository _readOnlyRespository;
 
