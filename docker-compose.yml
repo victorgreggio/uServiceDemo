@@ -1,0 +1,245 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: uservicedemo-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: WeatherforecastDB
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - uservicedemo-network
+
+  # MongoDB Database
+  mongodb:
+    image: mongo:7
+    container_name: uservicedemo-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongo
+      MONGO_INITDB_ROOT_PASSWORD: mongo
+      MONGO_INITDB_DATABASE: MongoWeatherforecastDocumentDB
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - uservicedemo-network
+
+  # Elasticsearch
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: uservicedemo-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - uservicedemo-network
+
+  # Azure Service Bus Emulator
+  azureservicebus:
+    image: mcr.microsoft.com/azure-messaging/servicebus-emulator:latest
+    container_name: uservicedemo-servicebus
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "ServiceBus123!"
+      SQL_SERVER: sqlserver-servicebus
+    ports:
+      - "5672:5672"
+    volumes:
+      - ./Config.json:/ServiceBus_Emulator/ConfigFiles/Config.json
+    depends_on:
+      sqlserver-servicebus:
+        condition: service_healthy
+    networks:
+      - uservicedemo-network
+
+  # SQL Server for Service Bus Emulator
+  sqlserver-servicebus:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: uservicedemo-sqlserver-servicebus
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "ServiceBus123!"
+      MSSQL_PID: "Developer"
+    networks:
+      - uservicedemo-network
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P ServiceBus123! -Q 'SELECT 1' -C || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # API Service
+  api:
+    build:
+      context: .
+      dockerfile: src/Api/Dockerfile
+      args:
+        NUGET_USERNAME: ${NUGET_USERNAME}
+        NUGET_PASSWORD: ${NUGET_PASSWORD}
+    container_name: uservicedemo-api
+    environment:
+      # ASP.NET Core configuration
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ASPNETCORE_HTTP_PORTS=8080
+      
+      # Database connection strings (Aspire format)
+      - ConnectionStrings__WeatherforecastDB=Host=postgres;Port=5432;Database=WeatherforecastDB;Username=postgres;Password=postgres
+      - ConnectionStrings__Postgres=Host=postgres;Port=5432;Database=WeatherforecastDB;Username=postgres;Password=postgres
+      
+      # MongoDB connection (Aspire format)
+      - ConnectionStrings__MongoWeatherforecastDocumentDB=mongodb://mongo:mongo@mongodb:27017
+      - ConnectionStrings__MongoDB=mongodb://mongo:mongo@mongodb:27017
+      
+      # Elasticsearch connection (Aspire format)
+      - ConnectionStrings__Elasticsearch=http://elasticsearch:9200
+      
+      # Azure Service Bus connection (Aspire format)
+      - ConnectionStrings__AzureServiceBus=Endpoint=sb://azureservicebus:5672;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true
+      
+      # Authentication
+      - Authentication__Authority=https://demo.duendesoftware.com
+      - Authentication__Audience=api
+      - Authentication__AuthIssuer=https://demo.duendesoftware.com
+      - Authentication__RequireHttpsMetadata=false
+      
+      # CORS
+      - Cors__AllowedOrigins__0=http://localhost:8082
+      - Cors__AllowedOrigins__1=http://ui:80
+      - Cors__AllowedMethods__0=GET
+      - Cors__AllowedMethods__1=POST
+      - Cors__AllowedMethods__2=PUT
+      - Cors__AllowedMethods__3=DELETE
+      - Cors__AllowedMethods__4=OPTIONS
+      - Cors__AllowedHeaders__0=*
+      
+      # Logging
+      - Logging__LogLevel__Default=Information
+      - Logging__LogLevel__Microsoft.AspNetCore=Warning
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+      sqlserver-servicebus:
+        condition: service_healthy
+      azureservicebus:
+        condition: service_started
+    networks:
+      - uservicedemo-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Worker Service
+  worker:
+    build:
+      context: .
+      dockerfile: src/Worker/Dockerfile
+      args:
+        NUGET_USERNAME: ${NUGET_USERNAME}
+        NUGET_PASSWORD: ${NUGET_PASSWORD}
+    container_name: uservicedemo-worker
+    environment:
+      # .NET configuration
+      - DOTNET_ENVIRONMENT=Development
+      
+      # Database connection strings (Aspire format)
+      - ConnectionStrings__WeatherforecastDB=Host=postgres;Port=5432;Database=WeatherforecastDB;Username=postgres;Password=postgres
+      - ConnectionStrings__Postgres=Host=postgres;Port=5432;Database=WeatherforecastDB;Username=postgres;Password=postgres
+      
+      # MongoDB connection (Aspire format)
+      - ConnectionStrings__MongoWeatherforecastDocumentDB=mongodb://mongo:mongo@mongodb:27017
+      - ConnectionStrings__MongoDB=mongodb://mongo:mongo@mongodb:27017
+      
+      # Elasticsearch connection (Aspire format)
+      - ConnectionStrings__Elasticsearch=http://elasticsearch:9200
+      
+      # Azure Service Bus connection (Aspire format)
+      - ConnectionStrings__AzureServiceBus=Endpoint=sb://azureservicebus:5672;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true
+      
+      # Logging
+      - Logging__LogLevel__Default=Information
+      - Logging__LogLevel__Microsoft=Warning
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+      sqlserver-servicebus:
+        condition: service_healthy
+      azureservicebus:
+        condition: service_started
+      api:
+        condition: service_healthy
+    networks:
+      - uservicedemo-network
+
+  # UI Service (Blazor WebAssembly)
+  ui:
+    build:
+      context: .
+      dockerfile: src/UI/Dockerfile
+      args:
+        NUGET_USERNAME: ${NUGET_USERNAME}
+        NUGET_PASSWORD: ${NUGET_PASSWORD}
+    container_name: uservicedemo-ui
+    ports:
+      - "8082:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - uservicedemo-network
+    # Note: Blazor WASM runs in the browser, so it needs the API URL accessible from the host
+    # You'll need to configure appsettings.Production.json with the correct API URL
+
+volumes:
+  postgres-data:
+    driver: local
+  mongodb-data:
+    driver: local
+  elasticsearch-data:
+    driver: local
+
+networks:
+  uservicedemo-network:
+    driver: bridge

@@ -1,0 +1,22 @@
+{
+  "UserConfig": {
+    "Logging": {
+      "Type": "File"
+    },
+    "Namespaces": [
+      {
+        "Name": "sbemulatorns",
+        "Topics": [
+          {
+            "Name": "weather",
+            "Subscriptions": [
+              {
+                "Name": "WeatherTopicListenerBackgroundService"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

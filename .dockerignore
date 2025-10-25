@@ -283,3 +283,19 @@ Dockerfile
 # .env file contains default environment variables for docker
 .env
 .git/
+.github/
+
+# Docker files
+docker-compose*.yml
+*.md
+
+# Test projects
+test/
+**/tests/
+**/*.Tests/
+**/*.Test/
+
+# Documentation
+docs/
+*.md
+

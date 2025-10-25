@@ -138,6 +138,47 @@ builder.AddYarp("ApiGateway")
 - **Read**: Retrieve individual forecast details
 - **Update**: Modify existing forecasts
 - **Delete**: Remove forecasts with confirmation
+- **Search**: Advanced search capabilities via Elasticsearch
+- **Versioned API**: Multiple API versions (V1, V2) for backward compatibility
+
+### Technical Capabilities
+
+#### Security
+- OAuth 2.0 / OIDC authentication with JWT Bearer tokens
+- Secure API endpoints with `[Authorize]` attribute
+- Anonymous access for health checks
+- Token-based authorization in Blazor WASM UI
+
+#### Data Management
+- **PostgreSQL**: Primary relational database with EF Core
+- **MongoDB**: Document storage for flexible data models
+- **Elasticsearch**: Full-text search and analytics
+- Repository pattern with multiple data store implementations
+
+#### Messaging & Events
+- Event-driven architecture with Azure Service Bus
+- Asynchronous message processing in Worker service
+- ProtoBuf binary serialization for efficient messaging
+- Background task queue for API operations
+
+#### API Features
+- RESTful endpoints with Minimal APIs
+- API versioning with URL segment routing
+- Swagger/OpenAPI documentation per version
+- Health check endpoint at `/health`
+- CORS configuration
+
+#### Monitoring & Observability
+- OpenTelemetry instrumentation for traces and metrics
+- Health checks for database connectivity
+- Structured logging
+- Service dependency tracking
+
+#### Development Experience
+- .NET Aspire orchestration for local development
+- Docker Compose for production-like environments
+- Hot reload support
+- Unified configuration management
 
 ### Data Flow Example
 
@@ -158,25 +199,34 @@ When a user creates a weather forecast:
 - **Blazor WebAssembly** - Client-side .NET web framework
 - **Bootstrap 5** - UI component library
 - **HttpClient** - REST API communication
+- **OIDC Client** - OAuth 2.0 authentication
 
 ### Backend
 - **ASP.NET Core 9.0** - Web API framework
 - **Minimal APIs** - Lightweight endpoint definitions
 - **Entity Framework Core** - ORM for PostgreSQL
 - **AutoMapper** - Object-to-object mapping
+- **Asp.Versioning** - API version management
 
 ### Data Storage
-- **PostgreSQL** - Primary relational database
-- **MongoDB** - Document store for flexible schemas
-- **Elasticsearch** - Search and analytics
+- **PostgreSQL 16** - Primary relational database
+- **MongoDB 7** - Document store for flexible schemas
+- **Elasticsearch 8.11** - Search and analytics engine
 
 ### Messaging & Events
-- **Azure Service Bus** - Reliable message broker
-- **ProtoBuf** - Efficient binary serialization
+- **Azure Service Bus** - Reliable message broker (with local emulator support)
+- **ProtoBuf** - Efficient binary serialization for messages
+
+### Observability
+- **OpenTelemetry** - Distributed tracing and metrics
+- **Health Checks** - Endpoint monitoring
+- **Structured Logging** - Application logging
 
 ### Infrastructure
-- **.NET Aspire** - Service orchestration
+- **.NET Aspire** - Service orchestration and development environment
+- **Docker Compose** - Container orchestration
 - **YARP** (Yet Another Reverse Proxy) - API Gateway
+- **Azure Service Bus Emulator** - Local message broker testing
 
 ## Getting Started
 
@@ -212,7 +262,73 @@ Once running, access:
 - **API Gateway**: `http://localhost:8081`
 - **UI Application**: Accessible through Aspire Dashboard or API Gateway
 
-#### Option 2: Running Services Individually
+#### Option 2: Using Docker Compose
+
+For production-like deployment without .NET Aspire:
+
+**Prerequisites**: Configure private NuGet feed credentials first!
+```bash
+# 1. Copy environment file
+cp .env.example .env
+
+# 2. Edit .env and add your GitHub credentials:
+#    NUGET_USERNAME=your-github-username
+#    NUGET_PASSWORD=your-github-pat-token
+# See NUGET_PRIVATE_FEED_SETUP.md for detailed instructions
+
+# 3. Build and start all services
+docker-compose up --build
+
+# Or use the convenience script
+# Windows:
+docker-manager.bat
+
+# Linux/Mac:
+chmod +x docker-manager.sh
+./docker-manager.sh
+```
+
+This starts:
+- ✅ API Service (http://localhost:8080)
+- ✅ Worker Service
+- ✅ UI (http://localhost:8082)
+- ✅ PostgreSQL (localhost:5432)
+- ✅ MongoDB (localhost:27017)
+- ✅ Elasticsearch (http://localhost:9200)
+- ✅ Azure Service Bus Emulator (localhost:5672)
+- ✅ SQL Server (for Service Bus backend)
+
+**Management Commands:**
+```bash
+# Start services
+docker-compose up -d
+
+# Stop services
+docker-compose down
+
+# View logs
+docker-compose logs -f
+
+# View specific service logs
+docker-compose logs -f api
+
+# Rebuild after code changes
+docker-compose up --build
+
+# Clean up everything (including volumes)
+docker-compose down -v
+```
+
+**Access Points:**
+- **UI Application**: http://localhost:8082
+- **API (Swagger)**: http://localhost:8080/swagger
+- **API Health Check**: http://localhost:8080/health
+- **pgAdmin** (dev only): http://localhost:5050 (admin@admin.com / admin)
+- **Mongo Express** (dev only): http://localhost:8081 (admin / admin)
+
+For detailed Docker deployment information, see [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md).
+
+#### Option 3: Running Services Individually
 
 **API Service:**
 ```bash
@@ -277,15 +393,34 @@ uServiceDemo/
 
 ## API Endpoints
 
-The API exposes the following endpoints through the gateway at `http://localhost:8081`:
+The API exposes versioned endpoints through the gateway at `http://localhost:8081`:
+
+### Version 1 (V1)
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/weatherforecast` | List all weather forecasts |
-| GET | `/api/weatherforecast/{id}` | Get forecast by ID |
-| POST | `/api/weatherforecast` | Create new forecast |
-| POST | `/api/weatherforecast/{id}` | Update existing forecast |
-| DELETE | `/api/weatherforecast/{id}` | Delete forecast |
+| GET | `/api/v1/weatherforecast` | List all weather forecasts |
+| GET | `/api/v1/weatherforecast/{id}` | Get forecast by ID |
+| POST | `/api/v1/weatherforecast` | Create new forecast |
+| PUT | `/api/v1/weatherforecast/{id}` | Update existing forecast |
+| DELETE | `/api/v1/weatherforecast/{id}` | Delete forecast |
+
+### Version 2 (V2)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v2/weatherforecast` | List all weather forecasts (enhanced) |
+| GET | `/api/v2/weatherforecast/{id}` | Get forecast by ID (with additional data) |
+| POST | `/api/v2/weatherforecast` | Create new forecast |
+| PUT | `/api/v2/weatherforecast/{id}` | Update existing forecast |
+| DELETE | `/api/v2/weatherforecast/{id}` | Delete forecast |
+
+### System Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/health` | Health check endpoint (anonymous) |
+| GET | `/swagger` | API documentation (development only) |
 
 ## Key Concepts Demonstrated
 
@@ -338,16 +473,6 @@ dotnet ef migrations add <MigrationName> --startup-project ../Api
 dotnet ef database update --startup-project ../Api
 ```
 
-## Documentation
-
-- **[ARCHITECTURE.md](ARCHITECTURE.md)**: Detailed system architecture and data flows
-- **[OAUTH_IMPLEMENTATION.md](OAUTH_IMPLEMENTATION.md)**: OAuth/OIDC authentication guide
-- **[OAUTH_CONFIGURATION_GUIDE.md](OAUTH_CONFIGURATION_GUIDE.md)**: Configure identity providers
-- **[OAUTH_SETUP_SUMMARY.md](OAUTH_SETUP_SUMMARY.md)**: Implementation summary
-- **[OAUTH_QUICK_REFERENCE.md](OAUTH_QUICK_REFERENCE.md)**: Quick reference card
-- **[UI_PROJECT_SUMMARY.md](UI_PROJECT_SUMMARY.md)**: UI implementation details
-- **[BLAZOR_UI_GUIDE.md](BLAZOR_UI_GUIDE.md)**: Blazor UI development guide
-
 ## Security
 
 ### Authentication & Authorization
@@ -361,6 +486,7 @@ This project implements **OAuth 2.0 / OpenID Connect (OIDC)** authentication usi
 - ✅ All API endpoints protected with `[Authorize]`
 - ✅ Login/Logout functionality in UI
 - ✅ Automatic token refresh
+- ✅ Anonymous access for health checks
 
 **Configuration:**
 - **Authority**: `https://demo.duendesoftware.com`
@@ -370,18 +496,45 @@ This project implements **OAuth 2.0 / OpenID Connect (OIDC)** authentication usi
 
 For detailed information, see [OAUTH_IMPLEMENTATION.md](OAUTH_IMPLEMENTATION.md).
 
-## Future Enhancements
+## Recent Improvements
 
-- [x] Authentication and authorization (JWT/OAuth2) ✅ **Implemented**
-- [ ] API versioning
+### Worker Service Message Processing (Oct 2024)
+- **Fixed**: Worker not processing Azure Service Bus messages in Docker environment
+- **Root Cause**: Missing `await` on async `Handle()` method in background service
+- **Solution**: Properly awaited async operations in `WeatherTopicListenerBackgroundService`
+
+### Azure Service Bus Emulator Support (Oct 2024)
+- **Fixed**: HTTP errors when using Service Bus Emulator
+- **Root Cause**: Provisioner attempting HTTP admin operations on emulator (only AMQP supported)
+- **Solution**: Early detection of emulator mode to skip provisioning operations
+
+### Health Check Authentication (Oct 2024)
+- **Fixed**: `/health` endpoint returning 401 Unauthorized
+- **Root Cause**: Incorrect middleware ordering - authentication ran before endpoint routing
+- **Solution**: Moved `UseAuthentication()` and `UseAuthorization()` before endpoint mapping
+- **Benefit**: Health checks now work properly with Docker healthcheck and monitoring tools
+
+## Implemented Features
+
+### ✅ Core Infrastructure
+- [x] **Authentication & Authorization** - OAuth 2.0/OIDC with JWT Bearer tokens
+- [x] **Containerization** - Full Docker Compose support with Azure Service Bus Emulator
+- [x] **API Versioning** - Multiple API versions (V1, V2) with Asp.Versioning
+- [x] **API Documentation** - Swagger/OpenAPI with versioned endpoints
+- [x] **Distributed Tracing** - OpenTelemetry integration with metrics and tracing
+- [x] **Health Checks** - Dedicated `/health` endpoint for monitoring
+- [x] **Unit Tests** - Test coverage for Application layer
+
+### 🚧 Future Enhancements
+
+- [ ] Integration test coverage
 - [ ] Rate limiting and throttling
-- [ ] Distributed tracing (OpenTelemetry)
-- [ ] API documentation (Swagger/OpenAPI)
-- [ ] Unit and integration test coverage
-- [ ] CI/CD pipeline
-- [ ] Containerization (Docker Compose)
-- [ ] Kubernetes deployment manifests
-- [ ] Performance monitoring and metrics
+- [ ] CI/CD pipeline (GitHub Actions)
+- [ ] Kubernetes deployment manifests (Helm charts)
+- [ ] Performance monitoring dashboard
+- [ ] API Gateway rate limiting
+- [ ] Distributed caching (Redis)
+- [ ] gRPC inter-service communication
 
 ## Contributing
 

@@ -20,13 +20,13 @@ internal class WeatherTopicListenerBackgroundService : BackgroundService
         _logger = logger;
     }
 
-    protected override Task<int> ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task<int> ExecuteAsync(CancellationToken stoppingToken)
     {
-        _messageHandler.Handle(TOPIC_NAME, PublishType.Topic, GetType().Name);
+        await _messageHandler.Handle(TOPIC_NAME, PublishType.Topic, GetType().Name);
         _logger.LogInformation($"Start listening for messages on topic: {TOPIC_NAME}");
 
-        while (stoppingToken.IsCancellationRequested == false) Thread.Sleep(100);
+        while (stoppingToken.IsCancellationRequested == false) await Task.Delay(100, stoppingToken);
 
-        return Task.FromResult(0);
+        return 0;
     }
 }
