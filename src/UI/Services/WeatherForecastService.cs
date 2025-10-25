@@ -7,7 +7,8 @@ namespace uServiceDemo.UI.Services;
 public class WeatherForecastService : IWeatherForecastService
 {
     private readonly HttpClient _httpClient;
-    private const string BaseUrl = "/weatherforecast";
+    private const string BaseUrl = "/api/v1/weatherforecast";
+    private const string BaseUrlV2 = "/api/v2/weatherforecast";
 
     public WeatherForecastService(HttpClient httpClient)
     {
@@ -22,7 +23,7 @@ public class WeatherForecastService : IWeatherForecastService
 
     public async Task<WeatherForecast?> GetByIdAsync(Guid id)
     {
-        return await _httpClient.GetFromJsonAsync<WeatherForecast>($"{BaseUrl}/{id}");
+        return await _httpClient.GetFromJsonAsync<WeatherForecast>($"{BaseUrlV2}/{id}");
     }
 
     public async Task<IEnumerable<WeatherForecast>> SearchAsync(string term)

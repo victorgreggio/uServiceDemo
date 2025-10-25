@@ -1,0 +1,66 @@
+@page "/unauthorized"
+
+<PageTitle>Unauthorized - Weather Forecast</PageTitle>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-shield-exclamation"></i> Access Denied
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <i class="bi bi-shield-exclamation text-danger" style="font-size: 4rem;"></i>
+                    </div>
+                    
+                    <h5 class="card-title text-center mb-3">You don't have permission to access this resource</h5>
+                    
+                    <p class="card-text text-muted text-center">
+                        The resource you're trying to access requires additional permissions that your account doesn't have.
+                    </p>
+
+                    <div class="alert alert-warning" role="alert">
+                        <strong>Error Code:</strong> 403 Forbidden
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <a href="/" class="btn btn-primary">
+                            <i class="bi bi-house-door"></i> Go to Home Page
+                        </a>
+                        <button type="button" class="btn btn-outline-secondary" @onclick="TryAgain">
+                            <i class="bi bi-arrow-clockwise"></i> Try Again
+                        </button>
+                        <button type="button" class="btn btn-outline-info" @onclick="BeginSignOut">
+                            <i class="bi bi-box-arrow-right"></i> Sign Out and Sign In Again
+                        </button>
+                    </div>
+
+                    <div class="mt-4 text-center">
+                        <small class="text-muted">
+                            If you believe you should have access to this resource, please contact your administrator.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Inject]
+    private NavigationManager Navigation { get; set; } = default!;
+
+    private void TryAgain()
+    {
+        // Go back to the previous page or home
+        Navigation.NavigateTo("/", forceLoad: true);
+    }
+
+    private void BeginSignOut()
+    {
+        Navigation.NavigateToLogout("authentication/logout");
+    }
+}

@@ -45,8 +45,12 @@ var authorizedUrls = builder.Configuration.GetSection("Api:BaseUrls").Get<string
 
 System.Console.WriteLine($"Authorized URLs: {string.Join(", ", authorizedUrls)}");
 
+// Register the UnauthorizedResponseHandler
+builder.Services.AddScoped<UnauthorizedResponseHandler>();
+
 builder.Services.AddHttpClient("API", 
     client => client.BaseAddress = new Uri(apiBaseUrl))
+    .AddHttpMessageHandler<UnauthorizedResponseHandler>()
     .AddHttpMessageHandler(sp =>
     {
         var handler = sp.GetRequiredService<AuthorizationMessageHandler>();
