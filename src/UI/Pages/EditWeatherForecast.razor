@@ -1,4 +1,6 @@
 @page "/weatherforecasts/edit/{id:guid}"
+@attribute [Authorize]
+@using Microsoft.AspNetCore.Authorization
 @using uServiceDemo.Contracts
 @using uServiceDemo.Contracts.Requests
 @using uServiceDemo.UI.Services

@@ -341,12 +341,38 @@ dotnet ef database update --startup-project ../Api
 ## Documentation
 
 - **[ARCHITECTURE.md](ARCHITECTURE.md)**: Detailed system architecture and data flows
+- **[OAUTH_IMPLEMENTATION.md](OAUTH_IMPLEMENTATION.md)**: OAuth/OIDC authentication guide
+- **[OAUTH_CONFIGURATION_GUIDE.md](OAUTH_CONFIGURATION_GUIDE.md)**: Configure identity providers
+- **[OAUTH_SETUP_SUMMARY.md](OAUTH_SETUP_SUMMARY.md)**: Implementation summary
+- **[OAUTH_QUICK_REFERENCE.md](OAUTH_QUICK_REFERENCE.md)**: Quick reference card
 - **[UI_PROJECT_SUMMARY.md](UI_PROJECT_SUMMARY.md)**: UI implementation details
-- **[src/UI/README.md](src/UI/README.md)**: UI-specific documentation
+- **[BLAZOR_UI_GUIDE.md](BLAZOR_UI_GUIDE.md)**: Blazor UI development guide
+
+## Security
+
+### Authentication & Authorization
+
+This project implements **OAuth 2.0 / OpenID Connect (OIDC)** authentication using **Duende Software's demo identity server**.
+
+**Key Features:**
+- ✅ OAuth 2.0 Authorization Code Flow with PKCE
+- ✅ JWT Bearer token authentication for API
+- ✅ Secure token storage in browser
+- ✅ All API endpoints protected with `[Authorize]`
+- ✅ Login/Logout functionality in UI
+- ✅ Automatic token refresh
+
+**Configuration:**
+- **Authority**: `https://demo.duendesoftware.com`
+- **Client ID**: `interactive.public`
+- **Scopes**: `openid`, `profile`, `api`
+- **Test Credentials**: `alice`/`alice` or `bob`/`bob`
+
+For detailed information, see [OAUTH_IMPLEMENTATION.md](OAUTH_IMPLEMENTATION.md).
 
 ## Future Enhancements
 
-- [ ] Authentication and authorization (JWT/OAuth2)
+- [x] Authentication and authorization (JWT/OAuth2) ✅ **Implemented**
 - [ ] API versioning
 - [ ] Rate limiting and throttling
 - [ ] Distributed tracing (OpenTelemetry)

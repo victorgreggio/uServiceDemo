@@ -39,7 +39,8 @@ builder.AddProject<Projects.uServiceDemo_Worker>("worker")
 
 // UI
 builder.AddProject<Projects.uServiceDemo_UI>("ui")
-    .WithReference(api.GetEndpoint("apihttp"));
+    .WithReference(api.GetEndpoint("apihttp"))
+    .WaitFor(api);
 
 
 builder.Build().Run();

@@ -1,4 +1,6 @@
 @page "/weatherforecasts/create"
+@attribute [Authorize]
+@using Microsoft.AspNetCore.Authorization
 @using uServiceDemo.Contracts.Requests
 @using uServiceDemo.UI.Services
 @inject IWeatherForecastService WeatherForecastService

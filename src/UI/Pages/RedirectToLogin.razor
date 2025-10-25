@@ -1,0 +1,25 @@
+@inject NavigationManager Navigation
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+
+@code {
+    protected override void OnInitialized()
+    {
+        try
+        {
+            // Use the current URL as the return URL after authentication
+            var returnUrl = Navigation.Uri;
+            Navigation.NavigateToLogin("authentication/login", new InteractiveRequestOptions
+            {
+                Interaction = InteractionType.SignIn,
+                ReturnUrl = returnUrl
+            });
+        }
+        catch (Exception ex)
+        {
+            // Log error to console
+            Console.WriteLine($"Error navigating to login: {ex.Message}");
+            Console.WriteLine($"Stack trace: {ex.StackTrace}");
+            throw;
+        }
+    }
+}

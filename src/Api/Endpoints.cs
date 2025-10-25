@@ -19,7 +19,9 @@ public static class Endpoints
 {
     public static WebApplication MapEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("/weatherforecast").WithTags("WeatherForecast");
+        var group = app.MapGroup("/weatherforecast")
+            .WithTags("WeatherForecast")
+            .RequireAuthorization();
 
         group.MapGet("/", (IListWeatherForecastsUseCase useCase, ILogger<IListWeatherForecastsUseCase> logger) =>
             TryAndCatch(async () => await useCase.Execute(), logger))

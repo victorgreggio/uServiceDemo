@@ -268,18 +268,47 @@ Azure Service Bus
 - **.NET Aspire**: Service orchestration and management
 - **Container Orchestration**: Docker (implied by Aspire)
 
-## Security Considerations
+## Security Implementation
 
-Current implementation uses:
-- HTTP (development)
-- No authentication/authorization (to be implemented)
-- CORS configuration needed for production
-- API Gateway provides single entry point
+### Authentication & Authorization
 
-Future enhancements should include:
-- JWT or OAuth2 authentication
-- Role-based authorization
+The application implements **OAuth 2.0 / OpenID Connect** authentication:
+
+**UI (Blazor WASM):**
+- Authorization Code flow with PKCE
+- Automatic token management
+- Protected routes with `[Authorize]`
+- Login/Logout UI components
+
+**API (ASP.NET Core):**
+- JWT Bearer token validation
+- Token signature verification via JWKS
+- Audience validation (`api`)
+- All endpoints require authorization
+
+**Identity Provider:**
+- Duende Software Demo Server
+- Authority: `https://demo.duendesoftware.com`
+- Client: `interactive.public`
+- Scopes: `openid`, `profile`, `api`
+
+See [OAUTH_IMPLEMENTATION.md](../OAUTH_IMPLEMENTATION.md) for complete details.
+
+### Security Features
+
+Current implementation:
+- ✅ OAuth 2.0 / OIDC authentication
+- ✅ JWT Bearer token validation
+- ✅ PKCE for public clients
+- ✅ Secure token storage
+- ✅ CORS configuration
+- ✅ API Gateway single entry point
+- HTTP (development mode)
+
+Production enhancements needed:
 - HTTPS enforcement
+- Role-based authorization
+- Claim-based policies
 - API rate limiting
-- Input sanitization
-- XSS protection
+- Enhanced input sanitization
+- Additional XSS protection
