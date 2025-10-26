@@ -11,6 +11,7 @@ internal class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        builder.AddRabbitMQClient(connectionName: "RabbitMQ");
         builder.AddElasticsearchClient(connectionName: "Elasticsearch");
         builder.AddMongoDBClient(connectionName: "MongoWeatherforecastDocumentDB");
 

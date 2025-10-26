@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using AGTec.Common.Base.Extensions;
 using AGTec.Common.CQRS.CommandHandlers;
-using AGTec.Common.CQRS.Messaging.AzureServiceBus;
+using AGTec.Common.CQRS.Messaging.RabbitMQ;
 using AGTec.Common.CQRS.Messaging.ProtoBufSerializer;
 using AGTec.Common.CQRS.QueryHandlers;
 using Microsoft.Extensions.Configuration;
@@ -25,9 +25,9 @@ public static class Module
         services.AddDocumentModule();
 
         // CQRS
-        var azuerServiceBusConnectionString = configuration.GetConnectionString("AzureServiceBus");
+        var rabbitMQConnectionString = configuration.GetConnectionString("RabbitMQ");
         services.AddProtoBufMessagingSerializer();
-        services.AddCQRSWithMessaging(azuerServiceBusConnectionString);
+        services.AddCQRSWithMessaging(rabbitMQConnectionString);
 
         // Mappers
         services.AddSingleton(MapConfig.GetMapperConfiguration().CreateMapper());

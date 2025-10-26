@@ -176,7 +176,6 @@ builder.AddYarp("ApiGateway")
 
 #### Development Experience
 - .NET Aspire orchestration for local development
-- Docker Compose for production-like environments
 - Hot reload support
 - Unified configuration management
 
@@ -214,7 +213,7 @@ When a user creates a weather forecast:
 - **Elasticsearch 8.11** - Search and analytics engine
 
 ### Messaging & Events
-- **Azure Service Bus** - Reliable message broker (with local emulator support)
+- **Azure Service Bus** - Reliable message broker (cloud-based)
 - **ProtoBuf** - Efficient binary serialization for messages
 
 ### Observability
@@ -224,21 +223,34 @@ When a user creates a weather forecast:
 
 ### Infrastructure
 - **.NET Aspire** - Service orchestration and development environment
-- **Docker Compose** - Container orchestration
 - **YARP** (Yet Another Reverse Proxy) - API Gateway
-- **Azure Service Bus Emulator** - Local message broker testing
+- **Azure Service Bus** - Cloud-based message broker
 
 ## Getting Started
 
 ### Prerequisites
 
 - [.NET 9.0 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (for infrastructure services)
 - [Visual Studio 2022](https://visualstudio.microsoft.com/) or [VS Code](https://code.visualstudio.com/) with C# Dev Kit
+- [Azure Service Bus Namespace](https://portal.azure.com) - See [AZURE_SERVICE_BUS_SETUP.md](AZURE_SERVICE_BUS_SETUP.md) for setup instructions
 
 ### Running the Application
 
-#### Option 1: Using .NET Aspire (Recommended)
+#### Prerequisites Setup
+
+Before running the application, configure Azure Service Bus:
+
+1. **Create Azure Service Bus Namespace** (if not already done):
+   - See [AZURE_SERVICE_BUS_SETUP.md](AZURE_SERVICE_BUS_SETUP.md) for detailed instructions
+   - Choose Standard tier for full topic support
+
+2. **Configure Connection String**:
+   ```bash
+   cd src/AppHost
+   dotnet user-secrets set "ConnectionStrings:AzureServiceBus" "YOUR_CONNECTION_STRING"
+   ```
+
+#### Running with .NET Aspire
 
 The easiest way to run the entire application with all dependencies:
 
@@ -254,7 +266,7 @@ This starts:
 - ✅ API Gateway (YARP)
 - ✅ PostgreSQL
 - ✅ MongoDB
-- ✅ Azure Service Bus (local emulator)
+- ✅ Azure Service Bus (uses your configured namespace)
 - ✅ Elasticsearch
 
 Once running, access:
@@ -262,73 +274,7 @@ Once running, access:
 - **API Gateway**: `http://localhost:8081`
 - **UI Application**: Accessible through Aspire Dashboard or API Gateway
 
-#### Option 2: Using Docker Compose
-
-For production-like deployment without .NET Aspire:
-
-**Prerequisites**: Configure private NuGet feed credentials first!
-```bash
-# 1. Copy environment file
-cp .env.example .env
-
-# 2. Edit .env and add your GitHub credentials:
-#    NUGET_USERNAME=your-github-username
-#    NUGET_PASSWORD=your-github-pat-token
-# See NUGET_PRIVATE_FEED_SETUP.md for detailed instructions
-
-# 3. Build and start all services
-docker-compose up --build
-
-# Or use the convenience script
-# Windows:
-docker-manager.bat
-
-# Linux/Mac:
-chmod +x docker-manager.sh
-./docker-manager.sh
-```
-
-This starts:
-- ✅ API Service (http://localhost:8080)
-- ✅ Worker Service
-- ✅ UI (http://localhost:8082)
-- ✅ PostgreSQL (localhost:5432)
-- ✅ MongoDB (localhost:27017)
-- ✅ Elasticsearch (http://localhost:9200)
-- ✅ Azure Service Bus Emulator (localhost:5672)
-- ✅ SQL Server (for Service Bus backend)
-
-**Management Commands:**
-```bash
-# Start services
-docker-compose up -d
-
-# Stop services
-docker-compose down
-
-# View logs
-docker-compose logs -f
-
-# View specific service logs
-docker-compose logs -f api
-
-# Rebuild after code changes
-docker-compose up --build
-
-# Clean up everything (including volumes)
-docker-compose down -v
-```
-
-**Access Points:**
-- **UI Application**: http://localhost:8082
-- **API (Swagger)**: http://localhost:8080/swagger
-- **API Health Check**: http://localhost:8080/health
-- **pgAdmin** (dev only): http://localhost:5050 (admin@admin.com / admin)
-- **Mongo Express** (dev only): http://localhost:8081 (admin / admin)
-
-For detailed Docker deployment information, see [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md).
-
-#### Option 3: Running Services Individually
+#### Option 2: Running Services Individually
 
 **API Service:**
 ```bash
@@ -498,8 +444,14 @@ For detailed information, see [OAUTH_IMPLEMENTATION.md](OAUTH_IMPLEMENTATION.md)
 
 ## Recent Improvements
 
+### Aspire Azure Service Bus Integration (Jan 2025)
+- **Added**: Proper Aspire Azure Service Bus client integration
+- **Issue**: Worker and API services couldn't connect to Azure Service Bus emulator
+- **Solution**: Added `Aspire.Azure.Messaging.ServiceBus` package and client registration
+- **Benefit**: Services now properly receive connection string configuration from Aspire AppHost
+
 ### Worker Service Message Processing (Oct 2024)
-- **Fixed**: Worker not processing Azure Service Bus messages in Docker environment
+- **Fixed**: Worker not processing Azure Service Bus messages
 - **Root Cause**: Missing `await` on async `Handle()` method in background service
 - **Solution**: Properly awaited async operations in `WeatherTopicListenerBackgroundService`
 
@@ -512,13 +464,12 @@ For detailed information, see [OAUTH_IMPLEMENTATION.md](OAUTH_IMPLEMENTATION.md)
 - **Fixed**: `/health` endpoint returning 401 Unauthorized
 - **Root Cause**: Incorrect middleware ordering - authentication ran before endpoint routing
 - **Solution**: Moved `UseAuthentication()` and `UseAuthorization()` before endpoint mapping
-- **Benefit**: Health checks now work properly with Docker healthcheck and monitoring tools
+- **Benefit**: Health checks now work properly with monitoring tools
 
 ## Implemented Features
 
 ### ✅ Core Infrastructure
 - [x] **Authentication & Authorization** - OAuth 2.0/OIDC with JWT Bearer tokens
-- [x] **Containerization** - Full Docker Compose support with Azure Service Bus Emulator
 - [x] **API Versioning** - Multiple API versions (V1, V2) with Asp.Versioning
 - [x] **API Documentation** - Swagger/OpenAPI with versioned endpoints
 - [x] **Distributed Tracing** - OpenTelemetry integration with metrics and tracing

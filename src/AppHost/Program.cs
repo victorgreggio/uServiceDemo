@@ -1,9 +1,8 @@
-﻿using Aspire.Hosting.Yarp.Transforms;
-using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.Hosting;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-// Configure to accept self-signed certificates in development
+
 if (builder.Environment.IsDevelopment())
 {
     AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
@@ -11,7 +10,8 @@ if (builder.Environment.IsDevelopment())
 
 var postgres = builder.AddPostgres("Postgres").AddDatabase("WeatherforecastDB");
 var mongodb = builder.AddMongoDB("MongoDB").AddDatabase("MongoWeatherforecastDocumentDB");
-var azureServiceBus = builder.AddAzureServiceBus("AzureServiceBus");
+var rabbitmq = builder.AddRabbitMQ("RabbitMQ");
+        
 var elasticsearch = builder.AddElasticsearch("Elasticsearch");
 
 // Api
@@ -21,8 +21,8 @@ var api = builder.AddProject<Projects.uServiceDemo_Api>("api")
     .WaitFor(postgres)
     .WithReference(mongodb)
     .WaitFor(mongodb)
-    .WithReference(azureServiceBus)
-    .WaitFor(azureServiceBus)
+    .WithReference(rabbitmq)
+    .WaitFor(rabbitmq)
     .WithReference(elasticsearch)
     .WaitFor(elasticsearch);
 
@@ -32,8 +32,8 @@ builder.AddProject<Projects.uServiceDemo_Worker>("worker")
     .WaitFor(postgres)
     .WithReference(mongodb)
     .WaitFor(mongodb)
-    .WithReference(azureServiceBus)
-    .WaitFor(azureServiceBus)
+    .WithReference(rabbitmq)
+    .WaitFor(rabbitmq)
     .WithReference(elasticsearch)
     .WaitFor(elasticsearch);
 

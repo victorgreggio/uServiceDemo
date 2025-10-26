@@ -10,6 +10,7 @@ using uServiceDemo.Worker.EventHandlers;
 
 var builder = Host.CreateApplicationBuilder(args);
 
+builder.AddRabbitMQClient(connectionName: "RabbitMQ");
 builder.AddElasticsearchClient(connectionName: "Elasticsearch");
 builder.AddMongoDBClient(connectionName: "MongoWeatherforecastDocumentDB");
 

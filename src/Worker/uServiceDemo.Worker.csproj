@@ -16,6 +16,11 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="AGTec.Common.CQRS.Messaging.RabbitMQ" Version="1.0.0" />
+      <PackageReference Include="AGTec.Services.ServiceDefaults" Version="1.0.0" />
+      <PackageReference Include="Aspire.Elastic.Clients.Elasticsearch" Version="9.5.0" />
+      <PackageReference Include="Aspire.MongoDB.Driver" Version="9.5.2" />
+      <PackageReference Include="Aspire.RabbitMQ.Client" Version="9.5.2" />
       <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.10" />
     </ItemGroup>
 
