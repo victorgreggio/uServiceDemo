@@ -33,14 +33,14 @@ The application follows a **micro-service architecture** with the following key 
         │    (YARP)      │      │   Services        │
         └────────────────┘      └───────────────────┘
                                         │
-                        ┌───────────────┼───────────────┬────────┐
-                        │               │               │        │
-                        ▼               ▼               ▼        ▼
-                  ┌─────────┬──────┬────────┬──────────┐
-                  │PostgreSQL│ Mongo│ Azure  │Elastic-  │
-                  │   DB     │  DB  │Service │search    │
-                  │          │      │  Bus   │          │
-                  └─────────┴──────┴────────┴──────────┘
+                        ┌─────────────┼───────┬────────┐
+                        │             │       │        │
+                        ▼             ▼       ▼        ▼
+                        ┌─────────-┬──────┬────────┬─────────-┐
+                        │PostgreSQL│ Mongo│RabbitMQ│Elastic-  │
+                        │   DB     │  DB  │        │search    │
+                        │          │      │        │          │
+                        └────────-─┴─---──┴────────┴─────────-┘
 ```
 
 ### Component Descriptions
@@ -51,7 +51,7 @@ The application follows a **micro-service architecture** with the following key 
 4. **API Gateway (YARP)**: Reverse proxy that routes requests from the UI to the API service
 5. **PostgreSQL**: Primary relational database for structured data storage
 6. **MongoDB**: Document database for flexible data storage and querying
-7. **Azure Service Bus**: Message broker for event-driven communication between services
+7. **RabbitMQ**: Message broker for event-driven communication between services
 8. **Elasticsearch**: Search and analytics engine for advanced querying capabilities
 
 ## AGTecFramework Integration
@@ -68,7 +68,7 @@ This project extensively uses the **AGTecFramework** suite of packages to implem
 | **AGTec.Common.Repository.Search** | Elasticsearch repository abstractions | Document layer |
 | **AGTec.Common.Document** | Document database utilities | Document layer |
 | **AGTec.Common.CQRS** | CQRS pattern implementation | Application layer |
-| **AGTec.Common.CQRS.Messaging.AzureServiceBus** | Azure Service Bus integration | Application layer |
+| **AGTec.Common.CQRS.Messaging.RabbitMQ** | RabbitMQ integration | Application layer |
 | **AGTec.Common.CQRS.Messaging.ProtoBufSerializer** | Efficient message serialization | Application layer |
 | **AGTec.Common.BackgroundTaskQueue** | Background task processing | Application & Worker |
 | **AGTec.Services.ServiceDefaults** | Common service configurations | API service |
@@ -78,7 +78,7 @@ This project extensively uses the **AGTecFramework** suite of packages to implem
 - **CQRS (Command Query Responsibility Segregation)**: Separates read and write operations for better scalability
 - **Repository Pattern**: Abstracts data access logic
 - **Use Case Pattern**: Encapsulates business logic in discrete use cases
-- **Event-Driven Architecture**: Services communicate through events via Azure Service Bus
+- **Event-Driven Architecture**: Services communicate through events via RabbitMQ
 - **Clean Architecture**: Onion architecture with clear separation of concerns
 
 ## .NET Aspire Framework
@@ -101,21 +101,21 @@ The `AppHost` project orchestrates all services:
 // Infrastructure services
 var postgres = builder.AddPostgres("Postgres").AddDatabase("WeatherforecastDB");
 var mongodb = builder.AddMongoDB("MongoDB").AddDatabase("MongoWeatherforecastDocumentDB");
-var azureServiceBus = builder.AddAzureServiceBus("AzureServiceBus");
+var rabbitmq = builder.AddRabbitMQ("RabbitMQ");
 var elasticsearch = builder.AddElasticsearch("Elasticsearch");
 
 // API Service with dependencies
 var api = builder.AddProject<Projects.uServiceDemo_Api>("api")
     .WithReference(postgres).WaitFor(postgres)
     .WithReference(mongodb).WaitFor(mongodb)
-    .WithReference(azureServiceBus).WaitFor(azureServiceBus)
+    .WithReference(rabbitmq).WaitFor(rabbitmq)
     .WithReference(elasticsearch).WaitFor(elasticsearch);
 
 // Worker Service
 builder.AddProject<Projects.uServiceDemo_Worker>("worker")
     .WithReference(postgres).WaitFor(postgres)
     .WithReference(mongodb).WaitFor(mongodb)
-    .WithReference(azureServiceBus).WaitFor(azureServiceBus)
+    .WithReference(rabbitmq).WaitFor(rabbitmq)
     .WithReference(elasticsearch).WaitFor(elasticsearch);
 
 // UI and API Gateway
@@ -156,7 +156,7 @@ builder.AddYarp("ApiGateway")
 - Repository pattern with multiple data store implementations
 
 #### Messaging & Events
-- Event-driven architecture with Azure Service Bus
+- Event-driven architecture with RabbitMQ
 - Asynchronous message processing in Worker service
 - ProtoBuf binary serialization for efficient messaging
 - Background task queue for API operations
@@ -188,7 +188,7 @@ When a user creates a weather forecast:
 3. **API Service** invokes the `AddWeatherForecastUseCase`
 4. **Use Case** dispatches `CreateWeatherForecastCommand`
 5. **Command Handler** persists data to **PostgreSQL**
-6. **Event** (`WeatherForecastCreatedEvent`) is published to **Azure Service Bus**
+6. **Event** (`WeatherForecastCreatedEvent`) is published to **RabbitMQ**
 7. **Worker Service** receives event and updates **MongoDB** and **Elasticsearch**
 8. **UI** receives success response and updates the display
 
@@ -213,7 +213,7 @@ When a user creates a weather forecast:
 - **Elasticsearch 8.11** - Search and analytics engine
 
 ### Messaging & Events
-- **Azure Service Bus** - Reliable message broker (cloud-based)
+- **RabbitMQ 3.x** - Reliable AMQP message broker
 - **ProtoBuf** - Efficient binary serialization for messages
 
 ### Observability
@@ -224,7 +224,6 @@ When a user creates a weather forecast:
 ### Infrastructure
 - **.NET Aspire** - Service orchestration and development environment
 - **YARP** (Yet Another Reverse Proxy) - API Gateway
-- **Azure Service Bus** - Cloud-based message broker
 
 ## Getting Started
 
@@ -232,23 +231,8 @@ When a user creates a weather forecast:
 
 - [.NET 9.0 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
 - [Visual Studio 2022](https://visualstudio.microsoft.com/) or [VS Code](https://code.visualstudio.com/) with C# Dev Kit
-- [Azure Service Bus Namespace](https://portal.azure.com) - See [AZURE_SERVICE_BUS_SETUP.md](AZURE_SERVICE_BUS_SETUP.md) for setup instructions
 
 ### Running the Application
-
-#### Prerequisites Setup
-
-Before running the application, configure Azure Service Bus:
-
-1. **Create Azure Service Bus Namespace** (if not already done):
-   - See [AZURE_SERVICE_BUS_SETUP.md](AZURE_SERVICE_BUS_SETUP.md) for detailed instructions
-   - Choose Standard tier for full topic support
-
-2. **Configure Connection String**:
-   ```bash
-   cd src/AppHost
-   dotnet user-secrets set "ConnectionStrings:AzureServiceBus" "YOUR_CONNECTION_STRING"
-   ```
 
 #### Running with .NET Aspire
 
@@ -266,7 +250,7 @@ This starts:
 - ✅ API Gateway (YARP)
 - ✅ PostgreSQL
 - ✅ MongoDB
-- ✅ Azure Service Bus (uses your configured namespace)
+- ✅ RabbitMQ
 - ✅ Elasticsearch
 
 Once running, access:
@@ -294,7 +278,7 @@ cd src/UI
 dotnet run
 ```
 
-> **Note**: When running individually, ensure infrastructure services (PostgreSQL, MongoDB, Azure Service Bus, Elasticsearch) are running separately.
+> **Note**: When running individually, ensure infrastructure services (PostgreSQL, MongoDB, RabbitMQ, Elasticsearch) are running separately.
 
 ### Configuration
 
@@ -333,7 +317,6 @@ uServiceDemo/
 │   ├── UI/                     # Blazor WASM frontend
 │   └── Worker/                 # Background event processor
 ├── test/                       # Unit and integration tests
-├── ARCHITECTURE.md             # Detailed architecture documentation
 └── README.md                   # This file
 ```
 
@@ -440,31 +423,6 @@ This project implements **OAuth 2.0 / OpenID Connect (OIDC)** authentication usi
 - **Scopes**: `openid`, `profile`, `api`
 - **Test Credentials**: `alice`/`alice` or `bob`/`bob`
 
-For detailed information, see [OAUTH_IMPLEMENTATION.md](OAUTH_IMPLEMENTATION.md).
-
-## Recent Improvements
-
-### Aspire Azure Service Bus Integration (Jan 2025)
-- **Added**: Proper Aspire Azure Service Bus client integration
-- **Issue**: Worker and API services couldn't connect to Azure Service Bus emulator
-- **Solution**: Added `Aspire.Azure.Messaging.ServiceBus` package and client registration
-- **Benefit**: Services now properly receive connection string configuration from Aspire AppHost
-
-### Worker Service Message Processing (Oct 2024)
-- **Fixed**: Worker not processing Azure Service Bus messages
-- **Root Cause**: Missing `await` on async `Handle()` method in background service
-- **Solution**: Properly awaited async operations in `WeatherTopicListenerBackgroundService`
-
-### Azure Service Bus Emulator Support (Oct 2024)
-- **Fixed**: HTTP errors when using Service Bus Emulator
-- **Root Cause**: Provisioner attempting HTTP admin operations on emulator (only AMQP supported)
-- **Solution**: Early detection of emulator mode to skip provisioning operations
-
-### Health Check Authentication (Oct 2024)
-- **Fixed**: `/health` endpoint returning 401 Unauthorized
-- **Root Cause**: Incorrect middleware ordering - authentication ran before endpoint routing
-- **Solution**: Moved `UseAuthentication()` and `UseAuthorization()` before endpoint mapping
-- **Benefit**: Health checks now work properly with monitoring tools
 
 ## Implemented Features
 
