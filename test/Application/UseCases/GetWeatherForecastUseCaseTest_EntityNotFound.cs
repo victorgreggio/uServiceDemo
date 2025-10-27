@@ -1,26 +1,25 @@
 using System;
+using System.Threading.Tasks;
 using AGTec.Common.CQRS.Dispatchers;
 using AGTec.Common.Test;
-using AutoMapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using uServiceDemo.Application.Exceptions;
 using uServiceDemo.Application.Mappers;
 using uServiceDemo.Application.Queries;
 using uServiceDemo.Application.UseCases.GetWeatherForecast.V1;
-using uServiceDemo.Contracts;
 using uServiceDemo.Domain.Entities;
 
 namespace uServiceDemo.Application.Test.UseCases;
 
 [TestClass]
+[ExceptionSpecification]
 public class GetWeatherForecastUseCaseTest_EntityNotFound : AutoMockSpecification<GetWeatherForecastUseCase, IGetWeatherForecastUseCase>
 {
     private Mock<IQueryDispatcher> _queryDispatcher;
     private Guid _testId;
-    private Exception _exception;
 
-    protected override void GivenThat()
+    protected override Task GivenThat()
     {
         _testId = Guid.NewGuid();
 
@@ -30,23 +29,12 @@ public class GetWeatherForecastUseCaseTest_EntityNotFound : AutoMockSpecificatio
         _queryDispatcher.Setup(x => x.Execute<GetWeatherForecastByIdQuery, WeatherForecastEntity>(
             It.IsAny<GetWeatherForecastByIdQuery>()))
             .ReturnsAsync((WeatherForecastEntity)null);
+
+        return Task.CompletedTask;
     }
 
-    protected override void WhenIRun()
-    {
-        try
-        {
-            CreateSut().Execute(_testId).Wait();
-        }
-        catch (Exception ex)
-        {
-            _exception = ex.InnerException ?? ex;
-        }
-    }
+    protected override async Task WhenIRun() => await CreateSut().Execute(_testId);
 
     [TestMethod]
-    public void Should_Throw_NotFoundException()
-    {
-        Assert.IsInstanceOfType(_exception, typeof(NotFoundException));
-    }
+    public void Should_Throw_NotFoundException() => AssertExceptionThrown<NotFoundException>();
 }

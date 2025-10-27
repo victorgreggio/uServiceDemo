@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using AGTec.Common.CQRS.Dispatchers;
 using AGTec.Common.Test;
 using AutoMapper;
@@ -14,13 +15,13 @@ using uServiceDemo.Document.Entities;
 namespace uServiceDemo.Application.Test.UseCases;
 
 [TestClass]
+[ExceptionSpecification]
 public class SearchWeatherForecastUseCaseTest_EmptyResults : AutoMockSpecification<SearchWeatherForecastUseCase, ISearchWeatherForecastUseCase>
 {
     private Mock<IQueryDispatcher> _queryDispatcher;
     private string _searchTerm;
-    private Exception _exception;
 
-    protected override void GivenThat()
+    protected override Task GivenThat()
     {
         _searchTerm = "nonexistent";
 
@@ -29,24 +30,13 @@ public class SearchWeatherForecastUseCaseTest_EmptyResults : AutoMockSpecificati
         _queryDispatcher = Dep<IQueryDispatcher>();
         _queryDispatcher.Setup(x => x.Execute<SearchWeatherForecastQuery, IEnumerable<WeatherForecastDoc>>(
             It.IsAny<SearchWeatherForecastQuery>()))
-            .ReturnsAsync(new List<WeatherForecastDoc>());
+            .ReturnsAsync([]);
+
+        return Task.CompletedTask;
     }
 
-    protected override void WhenIRun()
-    {
-        try
-        {
-            CreateSut().Execute(_searchTerm).Wait();
-        }
-        catch (Exception ex)
-        {
-            _exception = ex.InnerException ?? ex;
-        }
-    }
+    protected override async Task WhenIRun() => await CreateSut().Execute(_searchTerm);
 
     [TestMethod]
-    public void Should_Throw_NotFoundException()
-    {
-        Assert.IsInstanceOfType(_exception, typeof(NotFoundException));
-    }
+    public void Should_Throw_NotFoundException() => AssertExceptionThrown<NotFoundException>();
 }

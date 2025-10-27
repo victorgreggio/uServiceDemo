@@ -12,7 +12,7 @@
         <PackageReference Include="AGTec.Common.CQRS.Messaging.RabbitMQ" Version="1.0.0" />
         <PackageReference Include="AGTec.Common.CQRS.Messaging.ProtoBufSerializer" Version="1.0.0" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.10" />
-        <PackageReference Include="AutoMapper" Version="15.0.1" />
+        <PackageReference Include="AutoMapper" Version="15.1.0" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\Contracts\uServiceDemo.Contracts.csproj" />

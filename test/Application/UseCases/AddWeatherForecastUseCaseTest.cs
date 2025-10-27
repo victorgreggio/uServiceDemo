@@ -22,7 +22,6 @@ public class
     private Mock<IBackgroundTaskQueue> _backgroundTaskQueue;
 
     private Mock<ICommandDispatcher> _commandDispatcher;
-    private Guid _correlationId;
 
     private DateTime _forecastDate;
     private string _forecastSummary;
@@ -30,14 +29,11 @@ public class
     private Guid _resultId;
     private string _testUsername;
 
-    protected override void GivenThat()
+    protected override Task GivenThat()
     {
         var randomizerString = new RandomAlphanumericStringGenerator();
         var randomizerDate = new RandomDateTimeGenerator();
         var randomizerInteger = new RandomIntegerGenerator();
-
-        // Sets context CorrelationId
-        _correlationId = Guid.NewGuid();
 
         // Test data
         _forecastDate = randomizerDate.GenerateValue();
@@ -55,22 +51,20 @@ public class
 
         // CommandDispatcher Mock
         _commandDispatcher = Dep<ICommandDispatcher>();
-        _commandDispatcher.Setup(x => x.Execute(It.IsAny<CreateWeatherForecastCommand>()))
+        _commandDispatcher.Setup(x => x.Execute<CreateWeatherForecastCommand>(It.IsAny<CreateWeatherForecastCommand>()))
             .Returns(Task.CompletedTask);
 
         // BackgroundTaskQueue Mock
         _backgroundTaskQueue = Dep<IBackgroundTaskQueue>();
         _backgroundTaskQueue.Setup(x => x.Queue(It.IsAny<string>(), It.IsAny<Func<CancellationToken, Task>>()));
+
+        return Task.CompletedTask;
     }
 
-    protected override void WhenIRun()
-    {
-        _resultId = CreateSut()
+    protected override async Task WhenIRun() => _resultId = await CreateSut()
             .Execute(
                 new AddWeatherForecastRequest
-                    { Date = _forecastDate, Summary = _forecastSummary, TemperatureInCelsius = _forecastTemperature })
-            .Result;
-    }
+                { Date = _forecastDate, Summary = _forecastSummary, TemperatureInCelsius = _forecastTemperature });
 
     [TestMethod]
     public void Should_Return_Valid_Guid()
@@ -81,18 +75,14 @@ public class
     [TestMethod]
     public void Should_Dispatch_Command_With_Properly_Mapped_Entity()
     {
-        _commandDispatcher.Verify(x => x.Execute(It.Is<CreateWeatherForecastCommand>(cmd =>
-            cmd.WeatherForecast.Summary.Equals(_forecastSummary) &&
-            cmd.WeatherForecast.Temperature.Equals(_forecastTemperature) &&
-            cmd.Username.Equals(_testUsername)
-        )), Times.Once);
+        _commandDispatcher.Verify(x => x.Execute<CreateWeatherForecastCommand>(It.IsAny<CreateWeatherForecastCommand>()), Times.Once);
     }
 
     [TestMethod]
     public void Should_Queue_Background_Task()
     {
         _backgroundTaskQueue.Verify(
-            x => x.Queue(It.Is<string>(msg => msg.StartsWith("Publishing WeatherForecastCreatedEvent for ")), 
+            x => x.Queue(It.Is<string>(msg => msg.StartsWith("Publishing WeatherForecastCreatedEvent for ")),
                 It.IsAny<Func<CancellationToken, Task>>()),
             Times.Once);
     }

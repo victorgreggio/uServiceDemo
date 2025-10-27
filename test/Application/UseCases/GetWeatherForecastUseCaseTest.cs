@@ -2,10 +2,8 @@ using System;
 using System.Threading.Tasks;
 using AGTec.Common.CQRS.Dispatchers;
 using AGTec.Common.Test;
-using AutoMapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using uServiceDemo.Application.Exceptions;
 using uServiceDemo.Application.Mappers;
 using uServiceDemo.Application.Queries;
 using uServiceDemo.Application.UseCases.GetWeatherForecast.V1;
@@ -22,7 +20,7 @@ public class GetWeatherForecastUseCaseTest : AutoMockSpecification<GetWeatherFor
     private WeatherForecastEntity _existingEntity;
     private WeatherForecast _result;
 
-    protected override void GivenThat()
+    protected override Task GivenThat()
     {
         _testId = Guid.NewGuid();
         _existingEntity = new WeatherForecastEntity(_testId)
@@ -38,12 +36,11 @@ public class GetWeatherForecastUseCaseTest : AutoMockSpecification<GetWeatherFor
         _queryDispatcher.Setup(x => x.Execute<GetWeatherForecastByIdQuery, WeatherForecastEntity>(
             It.Is<GetWeatherForecastByIdQuery>(q => q.Id == _testId)))
             .ReturnsAsync(_existingEntity);
+
+        return Task.CompletedTask;
     }
 
-    protected override void WhenIRun()
-    {
-        _result = CreateSut().Execute(_testId).Result;
-    }
+    protected override async Task WhenIRun() => _result = await CreateSut().Execute(_testId);
 
     [TestMethod]
     public void Should_Query_For_Entity()

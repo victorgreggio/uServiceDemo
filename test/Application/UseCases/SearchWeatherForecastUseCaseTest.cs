@@ -4,10 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using AGTec.Common.CQRS.Dispatchers;
 using AGTec.Common.Test;
-using AutoMapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using uServiceDemo.Application.Exceptions;
 using uServiceDemo.Application.Mappers;
 using uServiceDemo.Application.Queries;
 using uServiceDemo.Application.UseCases.SearchWeatherForecast.V1;
@@ -24,16 +22,16 @@ public class SearchWeatherForecastUseCaseTest : AutoMockSpecification<SearchWeat
     private IEnumerable<WeatherForecastDoc> _documents;
     private IEnumerable<WeatherForecast> _result;
 
-    protected override void GivenThat()
+    protected override Task GivenThat()
     {
         _searchTerm = "sunny";
         var doc1Id = Guid.NewGuid();
         var doc2Id = Guid.NewGuid();
-        _documents = new List<WeatherForecastDoc>
-        {
-            new WeatherForecastDoc(doc1Id) { Summary = "Sunny Day", Temperature = 25, Date = DateTime.UtcNow },
-            new WeatherForecastDoc(doc2Id) { Summary = "Mostly Sunny", Temperature = 22, Date = DateTime.UtcNow }
-        };
+        _documents =
+        [
+            new(doc1Id) { Summary = "Sunny Day", Temperature = 25, Date = DateTime.UtcNow },
+            new(doc2Id) { Summary = "Mostly Sunny", Temperature = 22, Date = DateTime.UtcNow }
+        ];
 
         AutoMocker.SetInstance(MapConfig.GetMapperConfiguration().CreateMapper());
 
@@ -41,12 +39,11 @@ public class SearchWeatherForecastUseCaseTest : AutoMockSpecification<SearchWeat
         _queryDispatcher.Setup(x => x.Execute<SearchWeatherForecastQuery, IEnumerable<WeatherForecastDoc>>(
             It.Is<SearchWeatherForecastQuery>(q => q.Term == _searchTerm)))
             .ReturnsAsync(_documents);
+
+        return Task.CompletedTask;
     }
 
-    protected override void WhenIRun()
-    {
-        _result = CreateSut().Execute(_searchTerm).Result;
-    }
+    protected override async Task WhenIRun() => _result = await CreateSut().Execute(_searchTerm);
 
     [TestMethod]
     public void Should_Query_With_Search_Term()

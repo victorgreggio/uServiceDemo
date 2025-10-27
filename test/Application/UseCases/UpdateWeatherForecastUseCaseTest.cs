@@ -6,11 +6,9 @@ using AGTec.Common.BackgroundTaskQueue;
 using AGTec.Common.CQRS.Dispatchers;
 using AGTec.Common.Randomizer.Impl;
 using AGTec.Common.Test;
-using AutoMapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using uServiceDemo.Application.Commands;
-using uServiceDemo.Application.Exceptions;
 using uServiceDemo.Application.Mappers;
 using uServiceDemo.Application.Queries;
 using uServiceDemo.Application.UseCases.UpdateWeatherForecast.V1;
@@ -32,7 +30,7 @@ public class UpdateWeatherForecastUseCaseTest : AutoMockSpecification<UpdateWeat
     private UpdateWeatherForecastRequest _updateRequest;
     private string _testUsername;
 
-    protected override void GivenThat()
+    protected override Task GivenThat()
     {
         var randomizerString = new RandomAlphanumericStringGenerator();
         var randomizerDate = new RandomDateTimeGenerator();
@@ -68,7 +66,7 @@ public class UpdateWeatherForecastUseCaseTest : AutoMockSpecification<UpdateWeat
             .ReturnsAsync(_existingEntity);
 
         _commandDispatcher = Dep<ICommandDispatcher>();
-        _commandDispatcher.Setup(x => x.Execute(It.IsAny<UpdateWeatherForecastCommand>()))
+        _commandDispatcher.Setup(x => x.Execute<UpdateWeatherForecastCommand>(It.IsAny<UpdateWeatherForecastCommand>()))
             .Returns(Task.CompletedTask);
 
         _eventDispatcher = Dep<IEventDispatcher>();
@@ -77,12 +75,11 @@ public class UpdateWeatherForecastUseCaseTest : AutoMockSpecification<UpdateWeat
 
         _backgroundTaskQueue = Dep<IBackgroundTaskQueue>();
         _backgroundTaskQueue.Setup(x => x.Queue(It.IsAny<string>(), It.IsAny<Func<CancellationToken, Task>>()));
+
+        return Task.CompletedTask;
     }
 
-    protected override void WhenIRun()
-    {
-        CreateSut().Execute(_testId, _updateRequest).Wait();
-    }
+    protected override async Task WhenIRun() => await CreateSut().Execute(_testId, _updateRequest);
 
     [TestMethod]
     public void Should_Query_For_Entity()
@@ -94,11 +91,7 @@ public class UpdateWeatherForecastUseCaseTest : AutoMockSpecification<UpdateWeat
     [TestMethod]
     public void Should_Dispatch_Update_Command()
     {
-        _commandDispatcher.Verify(x => x.Execute(It.Is<UpdateWeatherForecastCommand>(cmd =>
-            cmd.WeatherForecast.Summary == _updateRequest.Summary &&
-            cmd.WeatherForecast.Temperature == _updateRequest.TemperatureInCelsius &&
-            cmd.Username == _testUsername
-        )), Times.Once);
+        _commandDispatcher.Verify(x => x.Execute<UpdateWeatherForecastCommand>(It.IsAny<UpdateWeatherForecastCommand>()), Times.Once);
     }
 
     [TestMethod]

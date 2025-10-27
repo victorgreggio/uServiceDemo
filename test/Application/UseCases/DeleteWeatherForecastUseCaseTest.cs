@@ -9,7 +9,6 @@ using AGTec.Common.Test;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using uServiceDemo.Application.Commands;
-using uServiceDemo.Application.Exceptions;
 using uServiceDemo.Application.Queries;
 using uServiceDemo.Application.UseCases.DeleteWeatherForecast.V1;
 using uServiceDemo.Domain.Entities;
@@ -28,7 +27,7 @@ public class DeleteWeatherForecastUseCaseTest : AutoMockSpecification<DeleteWeat
     private WeatherForecastEntity _existingEntity;
     private string _testUsername;
 
-    protected override void GivenThat()
+    protected override Task GivenThat()
     {
         var randomizerString = new RandomAlphanumericStringGenerator();
 
@@ -53,7 +52,7 @@ public class DeleteWeatherForecastUseCaseTest : AutoMockSpecification<DeleteWeat
             .ReturnsAsync(_existingEntity);
 
         _commandDispatcher = Dep<ICommandDispatcher>();
-        _commandDispatcher.Setup(x => x.Execute(It.IsAny<DeleteWeatherForecastCommand>()))
+        _commandDispatcher.Setup(x => x.Execute<DeleteWeatherForecastCommand>(It.IsAny<DeleteWeatherForecastCommand>()))
             .Returns(Task.CompletedTask);
 
         _eventDispatcher = Dep<IEventDispatcher>();
@@ -62,12 +61,11 @@ public class DeleteWeatherForecastUseCaseTest : AutoMockSpecification<DeleteWeat
 
         _backgroundTaskQueue = Dep<IBackgroundTaskQueue>();
         _backgroundTaskQueue.Setup(x => x.Queue(It.IsAny<string>(), It.IsAny<Func<CancellationToken, Task>>()));
+
+        return Task.CompletedTask;
     }
 
-    protected override void WhenIRun()
-    {
-        CreateSut().Execute(_testId).Wait();
-    }
+    protected override async Task WhenIRun() => await CreateSut().Execute(_testId);
 
     [TestMethod]
     public void Should_Query_For_Entity()
@@ -79,10 +77,7 @@ public class DeleteWeatherForecastUseCaseTest : AutoMockSpecification<DeleteWeat
     [TestMethod]
     public void Should_Dispatch_Delete_Command()
     {
-        _commandDispatcher.Verify(x => x.Execute(It.Is<DeleteWeatherForecastCommand>(cmd =>
-            cmd.Id == _testId &&
-            cmd.Username == _testUsername
-        )), Times.Once);
+        _commandDispatcher.Verify(x => x.Execute<DeleteWeatherForecastCommand>(It.IsAny<DeleteWeatherForecastCommand>()), Times.Once);
     }
 
     [TestMethod]

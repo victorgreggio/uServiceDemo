@@ -1,28 +1,25 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Threading.Tasks;
 using AGTec.Common.CQRS.Dispatchers;
 using AGTec.Common.Test;
-using AutoMapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using uServiceDemo.Application.Exceptions;
 using uServiceDemo.Application.Mappers;
 using uServiceDemo.Application.Queries;
 using uServiceDemo.Application.UseCases.SearchWeatherForecast.V1;
-using uServiceDemo.Contracts;
 using uServiceDemo.Document.Entities;
 
 namespace uServiceDemo.Application.Test.UseCases;
 
 [TestClass]
+[ExceptionSpecification]
 public class SearchWeatherForecastUseCaseTest_NoResults : AutoMockSpecification<SearchWeatherForecastUseCase, ISearchWeatherForecastUseCase>
 {
     private Mock<IQueryDispatcher> _queryDispatcher;
     private string _searchTerm;
-    private Exception _exception;
 
-    protected override void GivenThat()
+    protected override Task GivenThat()
     {
         _searchTerm = "nonexistent";
 
@@ -31,30 +28,13 @@ public class SearchWeatherForecastUseCaseTest_NoResults : AutoMockSpecification<
         _queryDispatcher = Dep<IQueryDispatcher>();
         _queryDispatcher.Setup(x => x.Execute<SearchWeatherForecastQuery, IEnumerable<WeatherForecastDoc>>(
             It.IsAny<SearchWeatherForecastQuery>()))
-            .ReturnsAsync((IEnumerable<WeatherForecastDoc>)null);
+            .ReturnsAsync(new List<WeatherForecastDoc>());
+
+        return Task.CompletedTask;
     }
 
-    protected override void WhenIRun()
-    {
-        try
-        {
-            CreateSut().Execute(_searchTerm).Wait();
-        }
-        catch (Exception ex)
-        {
-            _exception = ex.InnerException ?? ex;
-        }
-    }
+    protected override async Task WhenIRun() => await CreateSut().Execute(_searchTerm);
 
     [TestMethod]
-    public void Should_Throw_NotFoundException()
-    {
-        Assert.IsInstanceOfType(_exception, typeof(NotFoundException));
-    }
-
-    [TestMethod]
-    public void Should_Have_Correct_Error_Message()
-    {
-        Assert.IsTrue(_exception.Message.Contains(_searchTerm));
-    }
+    public void Should_Throw_NotFoundException() => AssertExceptionThrown<NotFoundException>();
 }

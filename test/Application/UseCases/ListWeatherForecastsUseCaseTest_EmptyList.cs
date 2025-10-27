@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AGTec.Common.CQRS.Dispatchers;
 using AGTec.Common.Test;
-using AutoMapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using uServiceDemo.Application.Mappers;
@@ -19,20 +19,19 @@ public class ListWeatherForecastsUseCaseTest_EmptyList : AutoMockSpecification<L
     private Mock<IQueryDispatcher> _queryDispatcher;
     private IEnumerable<WeatherForecast> _result;
 
-    protected override void GivenThat()
+    protected override Task GivenThat()
     {
         AutoMocker.SetInstance(MapConfig.GetMapperConfiguration().CreateMapper());
 
         _queryDispatcher = Dep<IQueryDispatcher>();
         _queryDispatcher.Setup(x => x.Execute<ListAllWeatherForecastQuery, IEnumerable<WeatherForecastEntity>>(
             It.IsAny<ListAllWeatherForecastQuery>()))
-            .ReturnsAsync(new List<WeatherForecastEntity>());
+            .ReturnsAsync([]);
+
+        return Task.CompletedTask;
     }
 
-    protected override void WhenIRun()
-    {
-        _result = CreateSut().Execute().Result;
-    }
+    protected override async Task WhenIRun() => _result = await CreateSut().Execute();
 
     [TestMethod]
     public void Should_Return_Empty_List()

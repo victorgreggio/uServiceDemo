@@ -1,10 +1,7 @@
 using System;
-using System.Security.Principal;
-using System.Threading;
 using System.Threading.Tasks;
 using AGTec.Common.CQRS.Dispatchers;
 using AGTec.Common.Test;
-using AutoMapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using uServiceDemo.Application.Commands;
@@ -25,7 +22,7 @@ public class UpdateWeatherForecastUseCaseTest_UtcConversion : AutoMockSpecificat
     private WeatherForecastEntity _existingEntity;
     private UpdateWeatherForecastRequest _updateRequest;
 
-    protected override void GivenThat()
+    protected override Task GivenThat()
     {
         _testId = Guid.NewGuid();
         _existingEntity = new WeatherForecastEntity(_testId);
@@ -48,12 +45,11 @@ public class UpdateWeatherForecastUseCaseTest_UtcConversion : AutoMockSpecificat
         _commandDispatcher = Dep<ICommandDispatcher>();
         _commandDispatcher.Setup(x => x.Execute(It.IsAny<UpdateWeatherForecastCommand>()))
             .Returns(Task.CompletedTask);
+
+        return Task.CompletedTask;
     }
 
-    protected override void WhenIRun()
-    {
-        CreateSut().Execute(_testId, _updateRequest).Wait();
-    }
+    protected override async Task WhenIRun() => await CreateSut().Execute(_testId, _updateRequest);
 
     [TestMethod]
     public void Should_Convert_Date_To_Utc()

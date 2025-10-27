@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using AGTec.Common.CQRS.Dispatchers;
 using AGTec.Common.Test;
-using AutoMapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using uServiceDemo.Application.Mappers;
@@ -22,14 +21,14 @@ public class ListWeatherForecastsUseCaseTest : AutoMockSpecification<ListWeather
     private IEnumerable<WeatherForecastEntity> _entities;
     private IEnumerable<WeatherForecast> _result;
 
-    protected override void GivenThat()
+    protected override Task GivenThat()
     {
-        _entities = new List<WeatherForecastEntity>
-        {
-            new WeatherForecastEntity(Guid.NewGuid()) { Summary = "Sunny", Temperature = 25, Date = DateTime.UtcNow },
-            new WeatherForecastEntity(Guid.NewGuid()) { Summary = "Rainy", Temperature = 15, Date = DateTime.UtcNow },
-            new WeatherForecastEntity(Guid.NewGuid()) { Summary = "Windy", Temperature = 20, Date = DateTime.UtcNow }
-        };
+        _entities =
+        [
+            new(Guid.NewGuid()) { Summary = "Sunny", Temperature = 25, Date = DateTime.UtcNow },
+            new(Guid.NewGuid()) { Summary = "Rainy", Temperature = 15, Date = DateTime.UtcNow },
+            new(Guid.NewGuid()) { Summary = "Windy", Temperature = 20, Date = DateTime.UtcNow }
+        ];
 
         AutoMocker.SetInstance(MapConfig.GetMapperConfiguration().CreateMapper());
 
@@ -37,12 +36,11 @@ public class ListWeatherForecastsUseCaseTest : AutoMockSpecification<ListWeather
         _queryDispatcher.Setup(x => x.Execute<ListAllWeatherForecastQuery, IEnumerable<WeatherForecastEntity>>(
             It.IsAny<ListAllWeatherForecastQuery>()))
             .ReturnsAsync(_entities);
+
+        return Task.CompletedTask;
     }
 
-    protected override void WhenIRun()
-    {
-        _result = CreateSut().Execute().Result;
-    }
+    protected override async Task WhenIRun() => _result = await CreateSut().Execute();
 
     [TestMethod]
     public void Should_Query_For_All_Entities()
