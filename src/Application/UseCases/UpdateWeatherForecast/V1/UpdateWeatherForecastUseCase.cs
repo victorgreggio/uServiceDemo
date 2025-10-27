@@ -46,20 +46,28 @@ public class UpdateWeatherForecastUseCase : IUpdateWeatherForecastUseCase
         entity.Date = input.Date.Kind == DateTimeKind.Utc ? input.Date : input.Date.ToUniversalTime();
         entity.Summary = input.Summary;
 
+        // Update Wind information
+        if (input.WindSpeed.HasValue && input.WindDirection.HasValue)
+        {
+            if (entity.Wind == null)
+            {
+                entity.Wind = new WindEntity(Guid.NewGuid());
+            }
+            entity.Wind.Speed = input.WindSpeed.Value;
+            entity.Wind.Direction = (uServiceDemo.Domain.Enums.WindDirection)input.WindDirection.Value;
+        }
+        else
+        {
+            entity.Wind = null;
+        }
+
         var command = new UpdateWeatherForecastCommand(entity, Thread.CurrentPrincipal?.Identity?.Name);
         await _commandDispatcher.Execute(command);
 
-        try
-        {
-            var evt = _mapper.Map<WeatherForecastEntity, WeatherForecastUpdatedEvent>(entity);
 
-            _backgroundTaskQueue.Queue($"Publishing WeatherForecastUpdatedEvent for {evt.Id}",
-                cancelationToken => _eventDispatcher.Raise(evt));
-        }
-        catch (Exception)
-        {
-            // Log error but don't fail the request - event publishing is not critical for the operation
-            // TODO: Implement proper logging when Service Bus is configured
-        }
+        var evt = _mapper.Map<WeatherForecastEntity, WeatherForecastUpdatedEvent>(entity);
+
+        _backgroundTaskQueue.Queue($"Publishing WeatherForecastUpdatedEvent for {evt.Id}",
+            cancelationToken => _eventDispatcher.Raise(evt));
     }
 }

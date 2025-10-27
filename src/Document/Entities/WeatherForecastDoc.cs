@@ -16,5 +16,5 @@ public class WeatherForecastDoc : DocumentEntity
 
     public string Summary { get; set; }
     public string WindDirection { get; set; }
-    public uint WindSpeed { get; set; }
+    public int WindSpeed { get; set; }
 }

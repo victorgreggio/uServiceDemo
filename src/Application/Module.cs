@@ -49,7 +49,9 @@ public static class Module
         typeof(Module).Assembly
             .GetTypes()
             .Where(t => t.IsClass && t.IsAbstract == false &&
-                        t.IsNested == false && t.Namespace.Contains("UseCases"))
+                        t.IsNested == false && 
+                        t.Namespace != null &&
+                        t.Namespace.Contains("UseCases"))
             .ForEach(type =>
             {
                 var interfaceType = type.GetInterfaces().FirstOrDefault();

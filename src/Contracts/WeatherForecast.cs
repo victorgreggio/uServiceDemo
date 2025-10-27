@@ -1,4 +1,5 @@
 ﻿using System;
+using uServiceDemo.Contracts;
 
 namespace uServiceDemo.Contracts;
 
@@ -19,4 +20,8 @@ public class WeatherForecast
     public DateTime LastUpdated { get; set; }
 
     public string UpdatedBy { get; set; }
+
+    public int? WindSpeed { get; set; }
+
+    public WindDirection? WindDirection { get; set; }
 }

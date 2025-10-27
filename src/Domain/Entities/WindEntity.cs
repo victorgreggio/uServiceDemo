@@ -10,6 +10,6 @@ public class WindEntity : Entity
     {
     }
 
-    public uint Speed { set; get; }
+    public int Speed { set; get; }
     public WindDirection Direction { get; set; }
 }

@@ -46,6 +46,30 @@ else
                         <dt class="col-sm-3">Summary</dt>
                         <dd class="col-sm-9">@forecast.Summary</dd>
 
+                        <dt class="col-sm-3">Wind Speed</dt>
+                        <dd class="col-sm-9">
+                            @if (forecast.WindSpeed.HasValue)
+                            {
+                                <text>@forecast.WindSpeed km/h</text>
+                            }
+                            else
+                            {
+                                <text>N/A</text>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-3">Wind Direction</dt>
+                        <dd class="col-sm-9">
+                            @if (forecast.WindDirection.HasValue)
+                            {
+                                <text>@forecast.WindDirection</text>
+                            }
+                            else
+                            {
+                                <text>N/A</text>
+                            }
+                        </dd>
+
                         <dt class="col-sm-3">Created</dt>
                         <dd class="col-sm-9">@forecast.Created.ToString("f")</dd>
 

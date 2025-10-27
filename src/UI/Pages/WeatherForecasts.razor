@@ -44,6 +44,7 @@ else
                 <th>Temperature (C)</th>
                 <th>Temperature (F)</th>
                 <th>Summary</th>
+                <th>Wind</th>
                 <th>Created</th>
                 <th>Last Updated</th>
                 <th>Updated By</th>
@@ -58,6 +59,16 @@ else
                     <td>@forecast.TemperatureInCelsius</td>
                     <td>@forecast.TemperatureInFahrenheit</td>
                     <td>@forecast.Summary</td>
+                    <td>
+                        @if (forecast.WindSpeed.HasValue && forecast.WindDirection.HasValue)
+                        {
+                            <text>@forecast.WindSpeed km/h @forecast.WindDirection</text>
+                        }
+                        else
+                        {
+                            <text>N/A</text>
+                        }
+                    </td>
                     <td>@forecast.Created.ToShortDateString()</td>
                     <td>@forecast.LastUpdated.ToShortDateString()</td>
                     <td>@forecast.UpdatedBy</td>

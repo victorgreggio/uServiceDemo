@@ -2,6 +2,7 @@
 @attribute [Authorize]
 @using Microsoft.AspNetCore.Authorization
 @using uServiceDemo.Contracts.Requests
+@using uServiceDemo.Contracts
 @using uServiceDemo.UI.Services
 @inject IWeatherForecastService WeatherForecastService
 @inject NavigationManager NavigationManager
@@ -32,6 +33,28 @@
                 <label for="summary" class="form-label">Summary</label>
                 <InputText id="summary" @bind-Value="model.Summary" class="form-control" />
                 <ValidationMessage For="@(() => model.Summary)" />
+            </div>
+
+            <div class="mb-3">
+                <label for="windSpeed" class="form-label">Wind Speed (km/h)</label>
+                <InputNumber id="windSpeed" @bind-Value="model.WindSpeed" class="form-control" />
+                <ValidationMessage For="@(() => model.WindSpeed)" />
+            </div>
+
+            <div class="mb-3">
+                <label for="windDirection" class="form-label">Wind Direction</label>
+                <InputSelect id="windDirection" @bind-Value="model.WindDirection" class="form-control">
+                    <option value="">-- Select Direction --</option>
+                    <option value="@WindDirection.N">N (North)</option>
+                    <option value="@WindDirection.NE">NE (Northeast)</option>
+                    <option value="@WindDirection.E">E (East)</option>
+                    <option value="@WindDirection.SE">SE (Southeast)</option>
+                    <option value="@WindDirection.S">S (South)</option>
+                    <option value="@WindDirection.SW">SW (Southwest)</option>
+                    <option value="@WindDirection.W">W (West)</option>
+                    <option value="@WindDirection.NW">NW (Northwest)</option>
+                </InputSelect>
+                <ValidationMessage For="@(() => model.WindDirection)" />
             </div>
 
             <div class="mb-3">

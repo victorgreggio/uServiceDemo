@@ -1,6 +1,5 @@
 ﻿using System.Threading.Tasks;
 using AGTec.Common.CQRS.QueryHandlers;
-using AGTec.Common.Repository.Extensions;
 using Microsoft.EntityFrameworkCore;
 using uServiceDemo.Application.Queries;
 using uServiceDemo.Domain.Entities;
@@ -21,7 +20,7 @@ public class GetWeatherForecastByIdQueryHandler : IQueryHandler<GetWeatherForeca
     {
         return _readOnlyRespository
             .Select(x => x.Id == query.Id)
-            .Join(x => x.Wind)
+            .Include(x => x.Wind)
             .SingleOrDefaultAsync();
     }
 

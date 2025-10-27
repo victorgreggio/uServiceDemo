@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AGTec.Common.CQRS.QueryHandlers;
 using Microsoft.EntityFrameworkCore;
@@ -20,7 +21,9 @@ public class
 
     public async Task<IEnumerable<WeatherForecastEntity>> Execute(ListAllWeatherForecastQuery query)
     {
-        return await _readOnlyRespository.Select().ToListAsync();
+        return await _readOnlyRespository.Select()
+            .Include(x => x.Wind)
+            .ToListAsync();
     }
 
     public void Dispose()
